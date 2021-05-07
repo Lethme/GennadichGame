@@ -95,7 +95,7 @@ namespace GennadichGame
             }
             if (Keyboard.HasBeenPressed(Keys.Enter))
             {
-                _mainMenu.SelectedItem.Action.Invoke();
+                _mainMenu.Invoke();
             }
 
             switch (_state)
@@ -154,7 +154,7 @@ namespace GennadichGame
         }
         private void UpdateMainMenu(GameTime gameTime)
         {
-
+            _mainMenu.Update();
         }
         private void DrawMainMenu(GameTime gameTime)
         {

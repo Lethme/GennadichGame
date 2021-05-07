@@ -68,7 +68,7 @@ namespace GennadichGame
 
             _maxItemWidth *= 1.2f;
 
-            var position = new Vector2(_center.X, _center.Y - _items.Count / 2 * _itemHeight + _itemHeight / 2.1f);
+            var position = new Vector2(_center.X, _center.Y - _items.Count / 2 * _itemHeight + _itemHeight / 2.5f);
             foreach (var item in _items)
             {
                 item.Rect = new Rectangle(
@@ -88,6 +88,11 @@ namespace GennadichGame
         {
             foreach (var item in items) _items.Add(item);
         }
+        public void Invoke() => SelectedItem.Action.Invoke();
+        public void Update()
+        {
+
+        }
         public void Draw()
         {
             var position = new Vector2(_center.X, _center.Y - _items.Count / 2 * _itemHeight);
@@ -106,6 +111,7 @@ namespace GennadichGame
                 _spriteBatch.DrawString(_font, item.Text, new Vector2(position.X - _font.MeasureString(item.Text).X / 2, position.Y), Color.Black);
                 position.Y += _itemHeight;
             }
+
             _spriteBatch.End();
         }
     }
