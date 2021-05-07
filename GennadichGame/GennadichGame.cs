@@ -20,10 +20,12 @@ namespace GennadichGame
         private Vector2 _boardPosition;
         private float _boardScale;
         private Point _windowSize;
-
+        private Texture2D _arrowCursorTex;
+        private Texture2D _pointerCursorTex;
         private GameState _state = GameState.MainMenu;
-
         private MainMenu _mainMenu;
+        public Texture2D ArrowCursorTex => _arrowCursorTex;
+        public Texture2D PointerCursorTex => _pointerCursorTex;
         public GennadichGame(int width, int height)
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -50,7 +52,12 @@ namespace GennadichGame
 
             _fontSprite = Content.Load<SpriteFont>("consolas16");
 
-            _mainMenu = new MainMenu(Window, _graphics, _spriteBatch, _fontSprite,
+            _arrowCursorTex = Content.Load<Texture2D>("arrow");
+            _pointerCursorTex = Content.Load<Texture2D>("pointer");
+
+            Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
+
+            _mainMenu = new MainMenu(this, _graphics, _spriteBatch, _fontSprite,
                 new MainMenuItem("Play offline", () => { }),
                 new MainMenuItem("Create game", () => { }),
                 new MainMenuItem("Connect to existing game", () => { }),

@@ -22,13 +22,15 @@ namespace GennadichGame
     }
     public class MainMenu
     {
-        private GameWindow _window;
+        private GennadichGame _game;
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteFont _font;
         private List<MainMenuItem> _items;
         private Point _mousePosition;
         private Texture2D _selectedItemRect;
+        private Texture2D _arrowCursorTex;
+        private Texture2D _pointerCursorTex;
         private Color _selectedItemRectColor = Color.AliceBlue;
         private int _selectedItemIndex = 0;
         private Vector2 _center;
@@ -47,16 +49,20 @@ namespace GennadichGame
             }
         }
         public int ItemsCount => _items.Count;
-        public MainMenu(GameWindow window, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, SpriteFont spriteFont, params MainMenuItem[] items)
+        public MainMenu(GennadichGame game, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, SpriteFont spriteFont, params MainMenuItem[] items)
         {
             _items = new List<MainMenuItem>();
-            _window = window;
+            _game = game;
             _graphics = graphics;
             _spriteBatch = spriteBatch;
             _font = spriteFont;
+
+            _arrowCursorTex = _game.ArrowCursorTex;
+            _pointerCursorTex = _game.PointerCursorTex;
+
             AddItem(items);
 
-            _center = new Vector2(_window.ClientBounds.Width / 2, _window.ClientBounds.Height / 2);
+            _center = new Vector2(_game.Window.ClientBounds.Width / 2, _game.Window.ClientBounds.Height / 2);
             _itemHeight = _font.MeasureString(_items[0].Text).Y;
 
             _maxItemWidth = 0;
@@ -101,13 +107,13 @@ namespace GennadichGame
             {
                 if (_items[i].Rect.Contains(_mousePosition))
                 {
-                    Mouse.SetCursor(MouseCursor.Hand);
+                    Mouse.SetCursor(MouseCursor.FromTexture2D(_pointerCursorTex, 0, 0));
                     SelectedItemIndex = i;
                     itemSelected = true;
                 }
             }
 
-            if (!itemSelected) Mouse.SetCursor(MouseCursor.Arrow);
+            if (!itemSelected) Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
 
             if (Keyboard.HasBeenPressed(Keys.Up))
             {
