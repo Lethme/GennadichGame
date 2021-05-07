@@ -4,6 +4,7 @@ using System.Text;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace GennadichGame
 {
@@ -26,6 +27,7 @@ namespace GennadichGame
         private SpriteFont _font;
         private SpriteBatch _spriteBatch;
         private GraphicsDeviceManager _graphics;
+        private Point _mousePosition;
         private Texture2D _selectedItemRect;
         private Color _selectedItemRectColor = Color.AliceBlue;
         private int _selectedItem = 0;
@@ -91,7 +93,33 @@ namespace GennadichGame
         public void Invoke() => SelectedItem.Action.Invoke();
         public void Update()
         {
+            if (Keyboard.HasBeenPressed(Keys.Up))
+            {
+                SelectedItemIndex -= 1;
+            }
+            if (Keyboard.HasBeenPressed(Keys.Down))
+            {
+                SelectedItemIndex += 1;
+            }
+            if (Keyboard.HasBeenPressed(Keys.Enter) || Mouse.GetState().LeftButton == ButtonState.Pressed)
+            {
+                Invoke();
+            }
 
+            _mousePosition = Mouse.GetState().Position;
+
+            var itemSelected = false;
+
+            for (var i = 0; i < _items.Count; i++)
+            {
+                if (_items[i].Rect.Contains(_mousePosition))
+                {
+                    SelectedItemIndex = i;
+                    itemSelected = true;
+                }
+            }
+
+            if (!itemSelected) SelectedItemIndex = -1;
         }
         public void Draw()
         {

@@ -11,28 +11,6 @@ namespace GennadichGame
         Game,
         Score
     }
-    public class Keyboard
-    {
-        static KeyboardState currentKeyState;
-        static KeyboardState previousKeyState;
-
-        public static KeyboardState GetState()
-        {
-            previousKeyState = currentKeyState;
-            currentKeyState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
-            return currentKeyState;
-        }
-
-        public static bool IsPressed(Keys key)
-        {
-            return currentKeyState.IsKeyDown(key);
-        }
-
-        public static bool HasBeenPressed(Keys key)
-        {
-            return currentKeyState.IsKeyDown(key) && !previousKeyState.IsKeyDown(key);
-        }
-    }
     public class GennadichGame : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -83,20 +61,6 @@ namespace GennadichGame
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            //var keyboardState = Keyboard.GetState();
-            if (Keyboard.HasBeenPressed(Keys.Up))
-            {
-                _mainMenu.SelectedItemIndex -= 1;
-            }
-            if (Keyboard.HasBeenPressed(Keys.Down))
-            {
-                _mainMenu.SelectedItemIndex += 1;
-            }
-            if (Keyboard.HasBeenPressed(Keys.Enter))
-            {
-                _mainMenu.Invoke();
-            }
 
             switch (_state)
             {
