@@ -11,7 +11,7 @@ namespace GennadichGame
     public class MainMenuItem
     {
         public String Text { get; set; }
-        public Vector2 Size { get; set; }
+        public Point Size { get; set; }
         public Rectangle Rect { get; set; }
         public Action Action { get; set; }
         public MainMenuItem(String text, Action action)
@@ -23,29 +23,29 @@ namespace GennadichGame
     public class MainMenu
     {
         private GameWindow _window;
-        private List<MainMenuItem> _items;
-        private SpriteFont _font;
-        private SpriteBatch _spriteBatch;
         private GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+        private SpriteFont _font;
+        private List<MainMenuItem> _items;
         private Point _mousePosition;
         private Texture2D _selectedItemRect;
         private Color _selectedItemRectColor = Color.AliceBlue;
-        private int _selectedItem = 0;
+        private int _selectedItemIndex = 0;
         private Vector2 _center;
         private float _itemHeight;
         private float _maxItemWidth;
-        public int SelectedItemIndex 
+        private MainMenuItem SelectedItem => _items[_selectedItemIndex];
+        private int SelectedItemIndex 
         { 
             get
             {
-                return _selectedItem;
+                return _selectedItemIndex;
             }
             set
             {
-                if (!(value < 0 || value > ItemsCount - 1)) _selectedItem = value;
+                if (!(value < 0 || value > ItemsCount - 1)) _selectedItemIndex = value;
             }
         }
-        public MainMenuItem SelectedItem => _items[SelectedItemIndex];
         public int ItemsCount => _items.Count;
         public MainMenu(GameWindow window, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, SpriteFont spriteFont, params MainMenuItem[] items)
         {
@@ -64,7 +64,7 @@ namespace GennadichGame
             foreach (var item in _items)
             {
                 var width = _font.MeasureString(item.Text).X;
-                item.Size = new Vector2(width, _itemHeight);
+                item.Size = new Point((int)width, (int)_itemHeight);
                 if (width > _maxItemWidth) _maxItemWidth = width;
             }
 
@@ -93,19 +93,6 @@ namespace GennadichGame
         public void Invoke() => SelectedItem.Action.Invoke();
         public void Update()
         {
-            if (Keyboard.HasBeenPressed(Keys.Up))
-            {
-                SelectedItemIndex -= 1;
-            }
-            if (Keyboard.HasBeenPressed(Keys.Down))
-            {
-                SelectedItemIndex += 1;
-            }
-            if (Keyboard.HasBeenPressed(Keys.Enter) || Mouse.GetState().LeftButton == ButtonState.Pressed)
-            {
-                Invoke();
-            }
-
             _mousePosition = Mouse.GetState().Position;
 
             var itemSelected = false;
@@ -114,12 +101,30 @@ namespace GennadichGame
             {
                 if (_items[i].Rect.Contains(_mousePosition))
                 {
+                    Mouse.SetCursor(MouseCursor.Hand);
                     SelectedItemIndex = i;
                     itemSelected = true;
                 }
             }
 
-            if (!itemSelected) SelectedItemIndex = -1;
+            if (!itemSelected) Mouse.SetCursor(MouseCursor.Arrow);
+
+            if (Keyboard.HasBeenPressed(Keys.Up))
+            {
+                SelectedItemIndex -= 1;
+            }
+            if (Keyboard.HasBeenPressed(Keys.Down))
+            {
+                SelectedItemIndex += 1;
+            }
+            if (Keyboard.HasBeenPressed(Keys.Enter))
+            {
+                Invoke();
+            }
+            if (Mouse.GetState().LeftButton == ButtonState.Pressed && itemSelected)
+            {
+                Invoke();
+            }
         }
         public void Draw()
         {
