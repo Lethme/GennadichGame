@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
+using System.Collections.Generic;
+
 namespace GennadichGame
 {
     public enum GameState
@@ -22,10 +24,17 @@ namespace GennadichGame
         private Point _windowSize;
         private Texture2D _arrowCursorTex;
         private Texture2D _pointerCursorTex;
+        private Texture2D _backgroundTex;
         private GameState _state = GameState.MainMenu;
         private MainMenu _mainMenu;
+        public Dictionary<string, Texture2D> Backgrounds { get; }
         public Texture2D ArrowCursorTex => _arrowCursorTex;
         public Texture2D PointerCursorTex => _pointerCursorTex;
+        public Texture2D Background
+        {
+            get { return _backgroundTex; }
+            set { _backgroundTex = value; }
+        }
         public GennadichGame(int width, int height)
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -33,6 +42,8 @@ namespace GennadichGame
             IsMouseVisible = true;
 
             _windowSize = new Point(width, height);
+
+            Backgrounds = new Dictionary<string, Texture2D>();
         }
         protected override void Initialize()
         {
@@ -46,14 +57,16 @@ namespace GennadichGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             
-            _board = Content.Load<Texture2D>("board");
+            _board = Content.Load<Texture2D>("img/board");
             _boardScale = 0.3f;
             _boardPosition = new Vector2(Window.ClientBounds.Width / 2 - _board.Width * _boardScale / 2, Window.ClientBounds.Height / 2 - _board.Height * _boardScale / 2);
 
-            _fontSprite = Content.Load<SpriteFont>("consolas16");
+            _fontSprite = Content.Load<SpriteFont>("font/consolas16");
 
-            _arrowCursorTex = Content.Load<Texture2D>("arrow");
-            _pointerCursorTex = Content.Load<Texture2D>("pointer");
+            _arrowCursorTex = Content.Load<Texture2D>("img/arrow");
+            _pointerCursorTex = Content.Load<Texture2D>("img/pointer");
+
+            Backgrounds.Add("clouds", Content.Load<Texture2D>("img/background-1"));
 
             Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
 
@@ -96,6 +109,13 @@ namespace GennadichGame
         {
             GraphicsDevice.Clear(Color.White);
 
+            if (_backgroundTex != null)
+            {
+                _spriteBatch.Begin();
+                _spriteBatch.Draw(_backgroundTex, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), Color.White);
+                _spriteBatch.End();
+            }
+
             switch (_state)
             {
                 case GameState.MainMenu:
@@ -116,10 +136,6 @@ namespace GennadichGame
                         break;
                     }
             }
-
-            _spriteBatch.Begin();
-            _spriteBatch.End();
-            // TODO: Add your drawing code here
 
             base.Draw(gameTime);
         }

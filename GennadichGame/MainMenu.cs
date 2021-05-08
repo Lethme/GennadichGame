@@ -39,14 +39,8 @@ namespace GennadichGame
         private MainMenuItem SelectedItem => _items[_selectedItemIndex];
         private int SelectedItemIndex 
         { 
-            get
-            {
-                return _selectedItemIndex;
-            }
-            set
-            {
-                if (!(value < 0 || value > ItemsCount - 1)) _selectedItemIndex = value;
-            }
+            get { return _selectedItemIndex; }
+            set { if (!(value < 0 || value > ItemsCount - 1)) _selectedItemIndex = value; }
         }
         public int ItemsCount => _items.Count;
         public MainMenu(GennadichGame game, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, SpriteFont spriteFont, params MainMenuItem[] items)
@@ -64,6 +58,8 @@ namespace GennadichGame
 
             _center = new Vector2(_game.Window.ClientBounds.Width / 2, _game.Window.ClientBounds.Height / 2);
             _itemHeight = _font.MeasureString(_items[0].Text).Y;
+
+            _game.Background = _game.Backgrounds["clouds"];
 
             _maxItemWidth = 0;
             
