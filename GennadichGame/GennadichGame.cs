@@ -71,10 +71,10 @@ namespace GennadichGame
             Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
 
             _mainMenu = new MainMenu(this, _graphics, _spriteBatch, _fontSprite,
-                new MainMenuItem("Play offline", () => { }),
-                new MainMenuItem("Create game", () => { }),
-                new MainMenuItem("Connect to existing game", () => { }),
-                new MainMenuItem("Exit", () => Exit())
+                new MainMenuItem("Play offline", 0, () => { }),
+                new MainMenuItem("Create game", 0, () => { }),
+                new MainMenuItem("Connect to existing game", 0, () => { }),
+                new MainMenuItem("Exit", 0, () => Exit())
             );
         }
         protected override void Update(GameTime gameTime)

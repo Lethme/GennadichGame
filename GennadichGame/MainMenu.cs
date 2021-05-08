@@ -8,16 +8,23 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GennadichGame
 {
+    public enum ActionType
+    {
+        Update,
+        Draw
+    }
     public class MainMenuItem
     {
         public String Text { get; set; }
         public Point Size { get; set; }
         public Rectangle Rect { get; set; }
         public Action Action { get; set; }
-        public MainMenuItem(String text, Action action)
+        public ActionType Type { get; }
+        public MainMenuItem(String text, ActionType actionType, Action action)
         {
             this.Text = text;
             this.Action = action;
+            this.Type = actionType;
         }
     }
     public class MainMenu
@@ -31,8 +38,9 @@ namespace GennadichGame
         private Texture2D _selectedItemRect;
         private Texture2D _arrowCursorTex;
         private Texture2D _pointerCursorTex;
-        private Color _selectedItemRectColor = Color.AliceBlue;
+        private Color _selectedItemRectColor = Color.Aquamarine;
         private int _selectedItemIndex = 0;
+        private bool _itemSelected;
         private Vector2 _center;
         private float _itemHeight;
         private float _maxItemWidth;
@@ -97,7 +105,7 @@ namespace GennadichGame
         {
             _mousePosition = Mouse.GetState().Position;
 
-            var itemSelected = false;
+            _itemSelected = false;
 
             for (var i = 0; i < _items.Count; i++)
             {
@@ -105,11 +113,11 @@ namespace GennadichGame
                 {
                     Mouse.SetCursor(MouseCursor.FromTexture2D(_pointerCursorTex, 0, 0));
                     SelectedItemIndex = i;
-                    itemSelected = true;
+                    _itemSelected = true;
                 }
             }
 
-            if (!itemSelected) Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
+            if (!_itemSelected) Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
 
             if (Keyboard.HasBeenPressed(Keys.Up))
             {
@@ -119,11 +127,7 @@ namespace GennadichGame
             {
                 SelectedItemIndex += 1;
             }
-            if (Keyboard.HasBeenPressed(Keys.Enter))
-            {
-                Invoke();
-            }
-            if (Mouse.GetState().LeftButton == ButtonState.Pressed && itemSelected)
+            if (SelectedItem.Type == ActionType.Update && (Keyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
             {
                 Invoke();
             }
@@ -148,6 +152,11 @@ namespace GennadichGame
             }
 
             _spriteBatch.End();
+
+            if (SelectedItem.Type == ActionType.Draw && (Keyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
+            {
+                Invoke();
+            }
         }
     }
 }
