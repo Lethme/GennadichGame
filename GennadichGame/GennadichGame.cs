@@ -8,6 +8,7 @@ namespace GennadichGame
 {
     public enum GameState
     {
+        StartScreen,
         MainMenu,
         GameLobby,
         Game,
@@ -17,7 +18,7 @@ namespace GennadichGame
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Texture2D _board;
+        private Texture2D _dartsTexture;
         private SpriteFont _fontSprite;
         private Vector2 _boardPosition;
         private float _boardScale;
@@ -25,11 +26,16 @@ namespace GennadichGame
         private Texture2D _arrowCursorTex;
         private Texture2D _pointerCursorTex;
         private Texture2D _backgroundTex;
-        private GameState _state = GameState.MainMenu;
+        private GameState _gameState = GameState.Game;
         private MainMenu _mainMenu;
+        private GDarts _darts;
         public Dictionary<string, Texture2D> Backgrounds { get; }
+        public GraphicsDeviceManager Graphics => _graphics;
+        public SpriteBatch SpriteBatch => _spriteBatch;
         public Texture2D ArrowCursorTex => _arrowCursorTex;
         public Texture2D PointerCursorTex => _pointerCursorTex;
+        public Texture2D DartsTexture => _dartsTexture;
+        public Vector2 CentralPoint { get; }
         public Texture2D Background
         {
             get { return _backgroundTex; }
@@ -42,6 +48,8 @@ namespace GennadichGame
             IsMouseVisible = true;
 
             _windowSize = new Point(width, height);
+
+            CentralPoint = new Vector2(Window.ClientBounds.Width / 2, Window.ClientBounds.Height / 2);
 
             Backgrounds = new Dictionary<string, Texture2D>();
         }
@@ -57,9 +65,7 @@ namespace GennadichGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             
-            _board = Content.Load<Texture2D>("img/board");
-            _boardScale = 0.3f;
-            _boardPosition = new Vector2(Window.ClientBounds.Width / 2 - _board.Width * _boardScale / 2, Window.ClientBounds.Height / 2 - _board.Height * _boardScale / 2);
+            _dartsTexture = Content.Load<Texture2D>("img/board");
 
             _fontSprite = Content.Load<SpriteFont>("font/consolas16");
 
@@ -70,20 +76,26 @@ namespace GennadichGame
 
             Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
 
-            _mainMenu = new MainMenu(this, _graphics, _spriteBatch, _fontSprite,
+            _mainMenu = new MainMenu(this, _fontSprite,
                 new MainMenuItem("Play offline", 0, () => { }),
                 new MainMenuItem("Create game", 0, () => { }),
                 new MainMenuItem("Connect to existing game", 0, () => { }),
                 new MainMenuItem("Exit", 0, () => Exit())
             );
+
+            _darts = new GDarts(this, _dartsTexture);
         }
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            switch (_state)
+            switch (_gameState)
             {
+                case GameState.StartScreen:
+                    {
+                        break;
+                    }
                 case GameState.MainMenu:
                     {
                         UpdateMainMenu(gameTime);
@@ -95,6 +107,7 @@ namespace GennadichGame
                     }
                 case GameState.Game:
                     {
+                        UpdateGame(gameTime);
                         break;
                     }
                 case GameState.Score:
@@ -116,8 +129,12 @@ namespace GennadichGame
                 _spriteBatch.End();
             }
 
-            switch (_state)
+            switch (_gameState)
             {
+                case GameState.StartScreen:
+                    {
+                        break;
+                    }
                 case GameState.MainMenu:
                     {
                         DrawMainMenu(gameTime);
@@ -129,6 +146,7 @@ namespace GennadichGame
                     }
                 case GameState.Game:
                     {
+                        DrawGame(gameTime);
                         break;
                     }
                 case GameState.Score:
@@ -146,6 +164,14 @@ namespace GennadichGame
         private void DrawMainMenu(GameTime gameTime)
         {
             _mainMenu.Draw();
+        }
+        private void UpdateGame(GameTime gameTime)
+        {
+            
+        }
+        private void DrawGame(GameTime gameTime)
+        {
+            _darts.Draw();
         }
     }
 }

@@ -30,8 +30,6 @@ namespace GennadichGame
     public class MainMenu
     {
         private GennadichGame _game;
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
         private SpriteFont _font;
         private List<MainMenuItem> _items;
         private Point _mousePosition;
@@ -51,12 +49,10 @@ namespace GennadichGame
             set { if (!(value < 0 || value > ItemsCount - 1)) _selectedItemIndex = value; }
         }
         public int ItemsCount => _items.Count;
-        public MainMenu(GennadichGame game, GraphicsDeviceManager graphics, SpriteBatch spriteBatch, SpriteFont spriteFont, params MainMenuItem[] items)
+        public MainMenu(GennadichGame game, SpriteFont spriteFont, params MainMenuItem[] items)
         {
             _items = new List<MainMenuItem>();
             _game = game;
-            _graphics = graphics;
-            _spriteBatch = spriteBatch;
             _font = spriteFont;
 
             _arrowCursorTex = _game.ArrowCursorTex;
@@ -93,7 +89,7 @@ namespace GennadichGame
                 position.Y += _itemHeight;
             }
 
-            _selectedItemRect = new Texture2D(_graphics.GraphicsDevice, 1, 1);
+            _selectedItemRect = new Texture2D(_game.Graphics.GraphicsDevice, 1, 1);
             _selectedItemRect.SetData(new[] { Color.CornflowerBlue });
         }
         public void AddItem(params MainMenuItem[] items)
@@ -136,22 +132,22 @@ namespace GennadichGame
         {
             var position = new Vector2(_center.X, _center.Y - _items.Count / 2 * _itemHeight);
 
-            _spriteBatch.Begin();
+            _game.SpriteBatch.Begin();
             //_spriteBatch.DrawString(_font, _items[0].Text, center - _font.MeasureString(_items[0].Text) / 2, Color.Red);
 
             if (SelectedItemIndex != -1)
             {
                 var item = _items[SelectedItemIndex];
-                _spriteBatch.Draw(_selectedItemRect, item.Rect, _selectedItemRectColor);
+                _game.SpriteBatch.Draw(_selectedItemRect, item.Rect, _selectedItemRectColor);
             }
 
             foreach (var item in _items)
             {
-                _spriteBatch.DrawString(_font, item.Text, new Vector2(position.X - _font.MeasureString(item.Text).X / 2, position.Y), Color.Black);
+                _game.SpriteBatch.DrawString(_font, item.Text, new Vector2(position.X - _font.MeasureString(item.Text).X / 2, position.Y), Color.Black);
                 position.Y += _itemHeight;
             }
 
-            _spriteBatch.End();
+            _game.SpriteBatch.End();
 
             if (SelectedItem.Type == ActionType.Draw && (Keyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
             {
