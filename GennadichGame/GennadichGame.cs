@@ -20,13 +20,11 @@ namespace GennadichGame
         private SpriteBatch _spriteBatch;
         private Texture2D _dartsTexture;
         private SpriteFont _fontSprite;
-        private Vector2 _boardPosition;
-        private float _boardScale;
         private Point _windowSize;
         private Texture2D _arrowCursorTex;
         private Texture2D _pointerCursorTex;
         private Texture2D _backgroundTex;
-        private GameState _gameState = GameState.Game;
+        private GameState _gameState = GameState.MainMenu;
         private MainMenu _mainMenu;
         private GDarts _darts;
         public Dictionary<string, Texture2D> Backgrounds { get; }
@@ -89,6 +87,9 @@ namespace GennadichGame
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
+
+            if (Keyboard.HasBeenPressed(Keys.F1)) _gameState = GameState.MainMenu;
+            if (Keyboard.HasBeenPressed(Keys.F2)) _gameState = GameState.Game;
 
             switch (_gameState)
             {

@@ -8,6 +8,40 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GennadichGame
 {
+    public class GDartsSegment
+    {
+        public float NearDistance { get; }
+        public float FarDistance { get; }
+        public float FirstAngle { get; }
+        public float SecondAngle { get; }
+        public GDartsSegment((float near, float far) distance, (float first, float second) angle)
+        {
+            if (distance.near < 0 || distance.near > 1 || distance.far < 0 || distance.far > 1)
+                throw new ArgumentOutOfRangeException("Distance must be in [0; 1]");
+
+            NearDistance = distance.near;
+            FarDistance = distance.far;
+            FirstAngle = NormalizeAngle(angle.first);
+            SecondAngle = NormalizeAngle(angle.second);
+        }
+        public static void NormalizeAngle(ref float angle)
+        {
+            if (!(angle >= 0 && angle <= 360))
+            {
+                while (angle > 360) angle -= 360;
+                while (angle < 0) angle += 360;
+            }
+        }
+        public static float NormalizeAngle(float angle)
+        {
+            if (!(angle >= 0 && angle <= 360))
+            {
+                while (angle > 360) angle -= 360;
+                while (angle < 0) angle += 360;
+            }
+            return angle;
+        }
+    }
     public class GDarts
     {
         private GennadichGame _game;
