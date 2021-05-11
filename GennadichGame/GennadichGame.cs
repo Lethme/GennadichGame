@@ -19,7 +19,7 @@ namespace GennadichGame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Texture2D _dartsTexture;
-        private SpriteFont _fontSprite;
+        private SpriteFont _spriteFont;
         private Point _windowSize;
         private Texture2D _arrowCursorTex;
         private Texture2D _pointerCursorTex;
@@ -30,6 +30,7 @@ namespace GennadichGame
         public Dictionary<string, Texture2D> Backgrounds { get; }
         public GraphicsDeviceManager Graphics => _graphics;
         public SpriteBatch SpriteBatch => _spriteBatch;
+        public SpriteFont SpriteFont => _spriteFont;
         public Texture2D ArrowCursorTex => _arrowCursorTex;
         public Texture2D PointerCursorTex => _pointerCursorTex;
         public Texture2D DartsTexture => _dartsTexture;
@@ -65,7 +66,7 @@ namespace GennadichGame
             
             _dartsTexture = Content.Load<Texture2D>("img/board");
 
-            _fontSprite = Content.Load<SpriteFont>("font/consolas16");
+            _spriteFont = Content.Load<SpriteFont>("font/consolas16");
 
             _arrowCursorTex = Content.Load<Texture2D>("img/arrow");
             _pointerCursorTex = Content.Load<Texture2D>("img/pointer");
@@ -74,7 +75,7 @@ namespace GennadichGame
 
             Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
 
-            _mainMenu = new MainMenu(this, _fontSprite,
+            _mainMenu = new MainMenu(this, _spriteFont,
                 new MainMenuItem("Play offline", 0, () => { }),
                 new MainMenuItem("Create game", 0, () => { }),
                 new MainMenuItem("Connect to existing game", 0, () => { }),
