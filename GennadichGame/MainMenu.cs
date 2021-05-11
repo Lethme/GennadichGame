@@ -107,13 +107,13 @@ namespace GennadichGame
             {
                 if (_items[i].Rect.Contains(_mousePosition))
                 {
-                    Mouse.SetCursor(MouseCursor.FromTexture2D(_pointerCursorTex, 0, 0));
+                    _game.SetCursor(_pointerCursorTex);
                     SelectedItemIndex = i;
                     _itemSelected = true;
                 }
             }
 
-            if (!_itemSelected) Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
+            if (!_itemSelected) _game.SetCursor(_arrowCursorTex);
 
             if (Keyboard.HasBeenPressed(Keys.Up))
             {

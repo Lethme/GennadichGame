@@ -84,7 +84,7 @@ namespace GennadichGame
         }
         public void Update()
         {
-
+            _game.SetCursor(_game.ArrowCursorTex);
         }
         public void Draw()
         {
@@ -116,8 +116,6 @@ namespace GennadichGame
                        position.Angle - 360 > segment.FirstAngle &&
                        position.Angle < segment.SecondAngle;
             }
-
-            return false;
         }
         private (float Distance, float Angle) GetMousePositionParams()
         {

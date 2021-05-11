@@ -73,7 +73,7 @@ namespace GennadichGame
 
             Backgrounds.Add("clouds", Content.Load<Texture2D>("img/background-1"));
 
-            Mouse.SetCursor(MouseCursor.FromTexture2D(_arrowCursorTex, 0, 0));
+            SetCursor(_arrowCursorTex);
 
             _mainMenu = new MainMenu(this, _spriteFont,
                 new MainMenuItem("Play offline", 0, () => { }),
@@ -159,6 +159,10 @@ namespace GennadichGame
 
             base.Draw(gameTime);
         }
+        public void SetCursor(Texture2D cursorTexture)
+        {
+            Mouse.SetCursor(MouseCursor.FromTexture2D(cursorTexture, 0, 0));
+        }
         private void UpdateMainMenu(GameTime gameTime)
         {
             _mainMenu.Update();
@@ -169,7 +173,7 @@ namespace GennadichGame
         }
         private void UpdateGame(GameTime gameTime)
         {
-            
+            _darts.Update();
         }
         private void DrawGame(GameTime gameTime)
         {
