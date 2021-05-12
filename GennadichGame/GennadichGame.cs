@@ -58,6 +58,8 @@ namespace GennadichGame
             _graphics.PreferredBackBufferHeight = _windowSize.Y;
             _graphics.ApplyChanges();
 
+            Window.Title = "GDarts";
+
             base.Initialize();
         }
         protected override void LoadContent()
