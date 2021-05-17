@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GennadichGame
 {
-    public enum AngleNormalizeFactor
+    public enum AngleNormalizationFactor
     {
         PositiveOnly,
         AllowNegative
@@ -20,21 +20,29 @@ namespace GennadichGame
         public double FarDistance { get; }
         public float FirstAngle { get; }
         public float SecondAngle { get; }
-        public GDartsSegment((double near, double far) distance, (float first, float second) angle)
+        public GDartsSegment(double nearDistance, double farDistance, float firstAngle, float secondAngle)
         {
-            if (distance.near < 0 || distance.near > 1 || distance.far < 0 || distance.far > 1)
+            if (nearDistance < 0 || nearDistance > 1 || farDistance < 0 || farDistance > 1)
                 throw new ArgumentOutOfRangeException("Distance must be in [0; 1]");
 
-            NearDistance = distance.near;
-            FarDistance = distance.far;
-            FirstAngle = NormalizeAngle(angle.first, AngleNormalizeFactor.AllowNegative);
-            SecondAngle = NormalizeAngle(angle.second, AngleNormalizeFactor.AllowNegative);
+            NearDistance = nearDistance;
+            FarDistance = farDistance;
+            FirstAngle = NormalizeAngle(firstAngle, AngleNormalizationFactor.AllowNegative);
+            SecondAngle = NormalizeAngle(secondAngle, AngleNormalizationFactor.AllowNegative);
         }
-        public static float NormalizeAngle(float angle, AngleNormalizeFactor factor = AngleNormalizeFactor.PositiveOnly)
+        public override string ToString()
+        {
+            return $"({NearDistance}; {FarDistance}), ({FirstAngle}; {SecondAngle})";
+        }
+        public static implicit operator GDartsSegment((double nearDistance, double farDistance, float firstAngle, float secondAngle) segment)
+        {
+            return new GDartsSegment(segment.nearDistance, segment.farDistance, segment.firstAngle, segment.secondAngle);
+        }
+        public static float NormalizeAngle(float angle, AngleNormalizationFactor factor = AngleNormalizationFactor.PositiveOnly)
         {
             switch (factor)
             {
-                case AngleNormalizeFactor.AllowNegative:
+                case AngleNormalizationFactor.AllowNegative:
                 {
                     if (!(angle >= -360 && angle <= 360))
                     {
@@ -62,10 +70,9 @@ namespace GennadichGame
         private float _dartsScale;
         private Vector2 _dartsPosition;
         private List<GDartsSegment> _segments;
-        private GDartsSegment _testSegment = new GDartsSegment((0.2, 0.8), (-45, 45));
         public Vector2 DartsCenter => _dartsPosition + new Vector2(_dartsTex.Width / 2 * _dartsScale, _dartsTex.Height / 2 * _dartsScale);
         public Vector2 DartsSize => new Vector2(_dartsTex.Width * _dartsScale, _dartsTex.Height * _dartsScale);
-        public GDartsSegment IntersectedSegment => _segments.FirstOrDefault(segment => Intersect(segment));
+        public GDartsSegment IntersectedSegment => _segments.FirstOrDefault(segment => Intersects(segment));
         public GDarts(GennadichGame game, Texture2D dartsTex)
         {
             _game = game;
@@ -77,10 +84,15 @@ namespace GennadichGame
                 _game.Window.ClientBounds.Height / 2 - _dartsTex.Height * _dartsScale / 2
             );
 
-            _segments = new List<GDartsSegment>()
+
+            var segmentAngle = 360f / 20;
+            _segments = new List<GDartsSegment>();
+
+            for (var angle = 0f; angle < 360; angle += segmentAngle)
             {
-                
-            };
+                _segments.Add((0, 1, angle, angle + segmentAngle));
+            }
+
         }
         public void Update()
         {
@@ -94,14 +106,20 @@ namespace GennadichGame
 
             var mousePosition = GetMousePositionParams();
             _game.SpriteBatch.DrawString(_game.SpriteFont, $"Distance: {(mousePosition.Distance > 1 ? 1 : mousePosition.Distance)}", new Vector2(50, 50), Color.Black);
-            _game.SpriteBatch.DrawString(_game.SpriteFont, $"Angle: {(mousePosition.Angle < 0 ? mousePosition.Angle + 360 : mousePosition.Angle)}", new Vector2(50, 50 + _game.SpriteFont.MeasureString("TEST").Y), Color.Black);
-            _game.SpriteBatch.DrawString(_game.SpriteFont, $"Intersects segment: {Intersect(_testSegment)}", new Vector2(50, 50 + _game.SpriteFont.MeasureString("TEST").Y * 2), Color.Black);
+            _game.SpriteBatch.DrawString(_game.SpriteFont, $"Angle: {GDartsSegment.NormalizeAngle(mousePosition.Angle)}", new Vector2(50, 50 + _game.SpriteFont.MeasureString("TEST").Y), Color.Black);
+            _game.SpriteBatch.DrawString(_game.SpriteFont, $"Intersected segment: {IntersectedSegment}", new Vector2(50, 50 + _game.SpriteFont.MeasureString("TEST").Y * 2), Color.Black);
 
             _game.SpriteBatch.End();
         }
-        private bool Intersect(GDartsSegment segment)
+        private bool Intersects(GDartsSegment segment)
         {
             var position = GetMousePositionParams();
+
+            if (segment.FirstAngle >= 0 && segment.SecondAngle >= 0 && position.Angle < 0)
+            {
+                position.Angle = GDartsSegment.NormalizeAngle(position.Angle, AngleNormalizationFactor.PositiveOnly);
+            }
+
             if (segment.FirstAngle < segment.SecondAngle)
             {
                 return position.Distance > segment.NearDistance &&
@@ -124,7 +142,7 @@ namespace GennadichGame
             var mouseVector = mouseState.Position.ToVector2();
             var angle = (float)(-Math.Atan2(mouseVector.Y - DartsCenter.Y, mouseVector.X - DartsCenter.X) / Math.PI * 180);
 
-            return (distance, GDartsSegment.NormalizeAngle(angle, AngleNormalizeFactor.AllowNegative));
+            return (distance, GDartsSegment.NormalizeAngle(angle, AngleNormalizationFactor.AllowNegative));
         }
     }
 }
