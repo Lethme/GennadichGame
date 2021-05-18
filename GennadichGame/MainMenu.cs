@@ -8,11 +8,6 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GennadichGame
 {
-    public enum ActionType
-    {
-        Update,
-        Draw
-    }
     public class MainMenuItem
     {
         public String Text { get; set; }
@@ -34,8 +29,6 @@ namespace GennadichGame
         private List<MainMenuItem> _items;
         private Point _mousePosition;
         private Texture2D _selectedItemRect;
-        private Texture2D _arrowCursorTex;
-        private Texture2D _pointerCursorTex;
         private Color _selectedItemRectColor = Color.Aquamarine;
         private int _selectedItemIndex = 0;
         private bool _itemSelected;
@@ -54,9 +47,6 @@ namespace GennadichGame
             _items = new List<MainMenuItem>();
             _game = game;
             _font = spriteFont;
-
-            _arrowCursorTex = _game.ArrowCursorTex;
-            _pointerCursorTex = _game.PointerCursorTex;
 
             AddItem(items);
 
@@ -90,7 +80,7 @@ namespace GennadichGame
             }
 
             _selectedItemRect = new Texture2D(_game.Graphics.GraphicsDevice, 1, 1);
-            _selectedItemRect.SetData(new[] { Color.CornflowerBlue });
+            _selectedItemRect.SetData(new[] { _selectedItemRectColor });
         }
         public void AddItem(params MainMenuItem[] items)
         {
@@ -107,13 +97,13 @@ namespace GennadichGame
             {
                 if (_items[i].Rect.Contains(_mousePosition))
                 {
-                    _game.SetCursor(_pointerCursorTex);
+                    _game.SetCursor(Cursor.Pointer);
                     SelectedItemIndex = i;
                     _itemSelected = true;
                 }
             }
 
-            if (!_itemSelected) _game.SetCursor(_arrowCursorTex);
+            if (!_itemSelected) _game.SetCursor(Cursor.Arrow);
 
             if (Keyboard.HasBeenPressed(Keys.Up))
             {

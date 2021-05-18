@@ -1,19 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
+using System;
 using System.Collections.Generic;
 
 namespace GennadichGame
 {
-    public enum GameState
-    {
-        StartScreen,
-        MainMenu,
-        GameLobby,
-        Game,
-        Score
-    }
     public class GennadichGame : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -23,6 +15,7 @@ namespace GennadichGame
         private Point _windowSize;
         private Texture2D _arrowCursorTex;
         private Texture2D _pointerCursorTex;
+        private Texture2D _currentCursorTex;
         private Texture2D _backgroundTex;
         private GameState _gameState = GameState.MainMenu;
         private MainMenu _mainMenu;
@@ -33,6 +26,7 @@ namespace GennadichGame
         public SpriteFont SpriteFont => _spriteFont;
         public Texture2D ArrowCursorTex => _arrowCursorTex;
         public Texture2D PointerCursorTex => _pointerCursorTex;
+        public Texture2D CurrentCursorTex => _currentCursorTex;
         public Texture2D DartsTexture => _dartsTexture;
         public Vector2 CentralPoint { get; }
         public Texture2D Background
@@ -75,7 +69,7 @@ namespace GennadichGame
 
             Backgrounds.Add("clouds", Content.Load<Texture2D>("img/background-1"));
 
-            SetCursor(_arrowCursorTex);
+            SetCursor(Cursor.Arrow);
 
             _mainMenu = new MainMenu(this, _spriteFont,
                 new MainMenuItem("Play offline", 0, () => { }),
@@ -88,82 +82,116 @@ namespace GennadichGame
         }
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            if (Keyboard.HasBeenPressed(Keys.F1)) _gameState = GameState.MainMenu;
-            if (Keyboard.HasBeenPressed(Keys.F2)) _gameState = GameState.Game;
-
-            switch (_gameState)
+            try
             {
-                case GameState.StartScreen:
-                    {
-                        break;
-                    }
-                case GameState.MainMenu:
-                    {
-                        UpdateMainMenu(gameTime);
-                        break;
-                    }
-                case GameState.GameLobby:
-                    {
-                        break;
-                    }
-                case GameState.Game:
-                    {
-                        UpdateGame(gameTime);
-                        break;
-                    }
-                case GameState.Score:
-                    {
-                        break;
-                    }
-            }
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                    Exit();
 
-            base.Update(gameTime);
+                if (Keyboard.HasBeenPressed(Keys.F1)) _gameState = GameState.MainMenu;
+                if (Keyboard.HasBeenPressed(Keys.F2)) _gameState = GameState.Game;
+
+                switch (_gameState)
+                {
+                    case GameState.StartScreen:
+                        {
+                            break;
+                        }
+                    case GameState.MainMenu:
+                        {
+                            UpdateMainMenu(gameTime);
+                            break;
+                        }
+                    case GameState.GameLobby:
+                        {
+                            break;
+                        }
+                    case GameState.Game:
+                        {
+                            UpdateGame(gameTime);
+                            break;
+                        }
+                    case GameState.Score:
+                        {
+                            break;
+                        }
+                }
+
+                base.Update(gameTime);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Update method exception:\n\n{ex.Message}");
+            }
         }
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.White);
-
-            if (_backgroundTex != null)
+            try
             {
-                _spriteBatch.Begin();
-                _spriteBatch.Draw(_backgroundTex, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), Color.White);
-                _spriteBatch.End();
-            }
+                GraphicsDevice.Clear(Color.White);
 
-            switch (_gameState)
+                if (_backgroundTex != null)
+                {
+                    _spriteBatch.Begin();
+                    _spriteBatch.Draw(_backgroundTex, new Rectangle(0, 0, Window.ClientBounds.Width, Window.ClientBounds.Height), Color.White);
+                    _spriteBatch.End();
+                }
+
+                switch (_gameState)
+                {
+                    case GameState.StartScreen:
+                        {
+                            break;
+                        }
+                    case GameState.MainMenu:
+                        {
+                            DrawMainMenu(gameTime);
+                            break;
+                        }
+                    case GameState.GameLobby:
+                        {
+                            break;
+                        }
+                    case GameState.Game:
+                        {
+                            DrawGame(gameTime);
+                            break;
+                        }
+                    case GameState.Score:
+                        {
+                            break;
+                        }
+                }
+
+                base.Draw(gameTime);
+            }
+            catch (Exception ex)
             {
-                case GameState.StartScreen:
-                    {
-                        break;
-                    }
-                case GameState.MainMenu:
-                    {
-                        DrawMainMenu(gameTime);
-                        break;
-                    }
-                case GameState.GameLobby:
-                    {
-                        break;
-                    }
-                case GameState.Game:
-                    {
-                        DrawGame(gameTime);
-                        break;
-                    }
-                case GameState.Score:
-                    {
-                        break;
-                    }
+                Console.WriteLine($"Draw method exception:\n\n{ex.Message}");
             }
-
-            base.Draw(gameTime);
         }
         public void SetCursor(Texture2D cursorTexture)
         {
-            Mouse.SetCursor(MouseCursor.FromTexture2D(cursorTexture, 0, 0));
+            if (_currentCursorTex != cursorTexture)
+            {
+                Mouse.SetCursor(MouseCursor.FromTexture2D(cursorTexture, 0, 0));
+                _currentCursorTex = cursorTexture;
+            }
+        }
+        public void SetCursor(Cursor cursor)
+        {
+            switch (cursor)
+            {
+                case Cursor.Pointer:
+                    {
+                        SetCursor(_pointerCursorTex);
+                        break;
+                    }
+                default:
+                    {
+                        SetCursor(_arrowCursorTex);
+                        break;
+                    }
+            }
         }
         private void UpdateMainMenu(GameTime gameTime)
         {

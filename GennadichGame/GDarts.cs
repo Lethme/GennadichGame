@@ -9,11 +9,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace GennadichGame
 {
-    public enum AngleNormalizationFactor
-    {
-        PositiveOnly,
-        AllowNegative
-    }
     public class GDartsSegment
     {
         public double NearDistance { get; }
@@ -70,7 +65,7 @@ namespace GennadichGame
         private float _dartsScale;
         private Vector2 _dartsPosition;
         private List<GDartsSegment> _segments;
-        public Vector2 DartsCenter => _dartsPosition + new Vector2(_dartsTex.Width / 2 * _dartsScale, _dartsTex.Height / 2 * _dartsScale);
+        public Vector2 DartsCenter => _dartsPosition + DartsSize / 2;
         public Vector2 DartsSize => new Vector2(_dartsTex.Width * _dartsScale, _dartsTex.Height * _dartsScale);
         public GDartsSegment IntersectedSegment => _segments.FirstOrDefault(segment => Intersects(segment));
         public GDarts(GennadichGame game, Texture2D dartsTex)
@@ -88,15 +83,22 @@ namespace GennadichGame
             var segmentAngle = 360f / 20;
             _segments = new List<GDartsSegment>();
 
+            _segments.Add((0, 0.02, 0, 360));
+            _segments.Add((0.02, 0.04, 0, 360));
+            _segments.Add((0.04, 0.07, 0, 360));
+            _segments.Add((0.78, 1, 0, 360));
+
             for (var angle = 0f; angle < 360; angle += segmentAngle)
             {
-                _segments.Add((0, 1, angle, angle + segmentAngle));
+                _segments.Add((0.07, 0.46, angle, angle + segmentAngle));
+                _segments.Add((0.46, 0.5, angle, angle + segmentAngle));
+                _segments.Add((0.5, 0.73, angle, angle + segmentAngle));
+                _segments.Add((0.73, 0.78, angle, angle + segmentAngle));
             }
-
         }
         public void Update()
         {
-            _game.SetCursor(_game.ArrowCursorTex);
+            _game.SetCursor(Cursor.Arrow);
         }
         public void Draw()
         {
