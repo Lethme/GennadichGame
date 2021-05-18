@@ -29,7 +29,7 @@ namespace GennadichGame
         private List<MainMenuItem> _items;
         private Point _mousePosition;
         private Texture2D _selectedItemRect;
-        private Color _selectedItemRectColor = Color.Aquamarine;
+        private Color _selectedItemRectColor = Color.CornflowerBlue;
         private int _selectedItemIndex = 0;
         private bool _itemSelected;
         private Vector2 _center;
@@ -80,7 +80,7 @@ namespace GennadichGame
             }
 
             _selectedItemRect = new Texture2D(_game.Graphics.GraphicsDevice, 1, 1);
-            _selectedItemRect.SetData(new[] { _selectedItemRectColor });
+            _selectedItemRect.SetData(new[] { Color.White });
         }
         public void AddItem(params MainMenuItem[] items)
         {
@@ -97,13 +97,13 @@ namespace GennadichGame
             {
                 if (_items[i].Rect.Contains(_mousePosition))
                 {
-                    _game.SetCursor(Cursor.Pointer);
+                    _game.CurrentCursor = Cursor.Pointer;
                     SelectedItemIndex = i;
                     _itemSelected = true;
                 }
             }
 
-            if (!_itemSelected) _game.SetCursor(Cursor.Arrow);
+            if (!_itemSelected) _game.CurrentCursor = Cursor.Arrow;
 
             if (Keyboard.HasBeenPressed(Keys.Up))
             {

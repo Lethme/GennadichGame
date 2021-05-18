@@ -18,21 +18,24 @@ namespace GennadichGame
         private Texture2D _currentCursorTex;
         private Texture2D _backgroundTex;
         private GameState _gameState = GameState.MainMenu;
+        private Cursor _currentCursor = Cursor.Arrow;
         private MainMenu _mainMenu;
         private GDarts _darts;
         public Dictionary<string, Texture2D> Backgrounds { get; }
         public GraphicsDeviceManager Graphics => _graphics;
         public SpriteBatch SpriteBatch => _spriteBatch;
         public SpriteFont SpriteFont => _spriteFont;
-        public Texture2D ArrowCursorTex => _arrowCursorTex;
-        public Texture2D PointerCursorTex => _pointerCursorTex;
-        public Texture2D CurrentCursorTex => _currentCursorTex;
         public Texture2D DartsTexture => _dartsTexture;
         public Vector2 CentralPoint { get; }
         public Texture2D Background
         {
             get { return _backgroundTex; }
             set { _backgroundTex = value; }
+        }
+        public Cursor CurrentCursor
+        {
+            get { return _currentCursor; }
+            set { SetCursor(value); }
         }
         public GennadichGame(int width, int height)
         {
@@ -69,7 +72,7 @@ namespace GennadichGame
 
             Backgrounds.Add("clouds", Content.Load<Texture2D>("img/background-1"));
 
-            SetCursor(Cursor.Arrow);
+            CurrentCursor = Cursor.Arrow;
 
             _mainMenu = new MainMenu(this, _spriteFont,
                 new MainMenuItem("Play offline", 0, () => { }),
@@ -169,7 +172,7 @@ namespace GennadichGame
                 Console.WriteLine($"Draw method exception:\n\n{ex.Message}");
             }
         }
-        public void SetCursor(Texture2D cursorTexture)
+        private void SetCursor(Texture2D cursorTexture)
         {
             if (_currentCursorTex != cursorTexture)
             {
@@ -179,6 +182,7 @@ namespace GennadichGame
         }
         public void SetCursor(Cursor cursor)
         {
+            _currentCursor = cursor;
             switch (cursor)
             {
                 case Cursor.Pointer:
@@ -193,21 +197,9 @@ namespace GennadichGame
                     }
             }
         }
-        private void UpdateMainMenu(GameTime gameTime)
-        {
-            _mainMenu.Update();
-        }
-        private void DrawMainMenu(GameTime gameTime)
-        {
-            _mainMenu.Draw();
-        }
-        private void UpdateGame(GameTime gameTime)
-        {
-            _darts.Update();
-        }
-        private void DrawGame(GameTime gameTime)
-        {
-            _darts.Draw();
-        }
+        private void UpdateMainMenu(GameTime gameTime) => _mainMenu.Update();
+        private void DrawMainMenu(GameTime gameTime) => _mainMenu.Draw();
+        private void UpdateGame(GameTime gameTime) => _darts.Update();
+        private void DrawGame(GameTime gameTime) => _darts.Draw();
     }
 }

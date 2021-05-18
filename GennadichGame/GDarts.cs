@@ -98,7 +98,7 @@ namespace GennadichGame
         }
         public void Update()
         {
-            _game.SetCursor(Cursor.Arrow);
+            _game.CurrentCursor = Cursor.Arrow;
         }
         public void Draw()
         {
