@@ -19,6 +19,14 @@
         None,
         Clouds
     }
+    public enum Textures
+    {
+        Darts,
+        ArrowCursor,
+        PointerCursor,
+        DartCursor,
+        Background1
+    }
     public enum AngleNormalizationFactor
     {
         PositiveOnly,

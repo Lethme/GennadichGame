@@ -18,11 +18,11 @@ namespace GennadichGame
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
-        private Texture2D _dartsTexture;
         private SpriteFont _spriteFont;
         private Point _windowSize;
         private MainMenu _mainMenu;
         private GDarts _darts;
+        public TextureManager TextureManager { get; }
         public BackgroundManager BackgroundManager { get; }
         public CursorManager CursorManager { get; }
         private SceneManager SceneManager { get; }
@@ -38,6 +38,7 @@ namespace GennadichGame
             _windowSize = new Point(width, height);
 
             BackgroundManager = new BackgroundManager(this);
+            TextureManager = new TextureManager();
             CursorManager = new CursorManager();
             SceneManager = new SceneManager();
         }
@@ -55,22 +56,16 @@ namespace GennadichGame
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            _dartsTexture = Content.Load<Texture2D>("img/board");
+            TextureManager.AddTexture
+            (
+                (Textures.Darts, Content.Load<Texture2D>("img/board")),
+                (Textures.ArrowCursor, Content.Load<Texture2D>("img/arrow")),
+                (Textures.PointerCursor, Content.Load<Texture2D>("img/pointer")),
+                (Textures.DartCursor, Content.Load<Texture2D>("img/dart")),
+                (Textures.Background1, Content.Load<Texture2D>("img/background-1"))
+            );
 
             _spriteFont = Content.Load<SpriteFont>("font/consolas16");
-
-            CursorManager.AddCursor
-            (
-                (Cursor.Arrow, Content.Load<Texture2D>("img/arrow")),
-                (Cursor.Pointer, Content.Load<Texture2D>("img/pointer")),
-                (Cursor.Dart, Content.Load<Texture2D>("img/dart"))
-            );
-
-            BackgroundManager.AddBackground
-            (
-                (BackgroundImage.None, null),
-                (BackgroundImage.Clouds, Content.Load<Texture2D>("img/background-1"))
-            );
 
             _mainMenu = new MainMenu(this,
                 new MainMenuItem("Play offline", 0, () => { }),
@@ -79,12 +74,25 @@ namespace GennadichGame
                 new MainMenuItem("Exit", 0, () => Exit())
             );
 
-            _darts = new GDarts(this, _dartsTexture);
+            _darts = new GDarts(this, TextureManager[Textures.Darts]);
+
+            CursorManager.AddCursor
+            (
+                (Cursor.Arrow, TextureManager[Textures.ArrowCursor]),
+                (Cursor.Pointer, TextureManager[Textures.PointerCursor]),
+                (Cursor.Dart, TextureManager[Textures.DartCursor])
+            );
+
+            BackgroundManager.AddBackground
+            (
+                (BackgroundImage.None, null),
+                (BackgroundImage.Clouds, TextureManager[Textures.Background1])
+            );
 
             SceneManager.AddScene
             (
-                ( GameState.MainMenu, _mainMenu ),
-                ( GameState.Game, _darts )
+                (GameState.MainMenu, _mainMenu),
+                (GameState.Game, _darts)
             );
 
             CursorManager.ActiveCursor = Cursor.Dart;
