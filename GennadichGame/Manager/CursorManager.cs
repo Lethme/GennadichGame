@@ -6,10 +6,11 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 
 using GennadichGame.Enums;
+using System.Collections;
 
 namespace GennadichGame.Manager
 {
-    public class CursorManager
+    public class CursorManager : IEnumerable<KeyValuePair<Cursor, Texture2D>>
     {
         private Cursor _currentCursor;
         private Texture2D _currentCursorTex;
@@ -44,6 +45,14 @@ namespace GennadichGame.Manager
             }
 
             return false;
+        }
+        public IEnumerator<KeyValuePair<Cursor, Texture2D>> GetEnumerator()
+        {
+            return Cursors.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Cursors.GetEnumerator();
         }
     }
 }

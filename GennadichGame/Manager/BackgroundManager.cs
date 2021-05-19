@@ -6,10 +6,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using GennadichGame.Enums;
+using System.Collections;
 
 namespace GennadichGame.Manager
 {
-    public class BackgroundManager
+    public class BackgroundManager : IEnumerable<KeyValuePair<BackgroundImage, Texture2D>>
     {
         private GennadichGame _game;
         private BackgroundImage _currentBackground;
@@ -42,7 +43,7 @@ namespace GennadichGame.Manager
         {
             foreach (var background in backgrounds) Backgrounds.Add(background.image, background.backgroundTexture);
         }
-        public void Draw()
+        public void DrawBackground()
         {
             if (_currentBackgroundTex != null)
             {
@@ -64,6 +65,14 @@ namespace GennadichGame.Manager
             }
 
             return false;
+        }
+        public IEnumerator<KeyValuePair<BackgroundImage, Texture2D>> GetEnumerator()
+        {
+            return Backgrounds.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Backgrounds.GetEnumerator();
         }
     }
 }

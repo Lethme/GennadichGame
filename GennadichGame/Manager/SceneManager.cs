@@ -5,10 +5,11 @@ using System.Collections.Generic;
 
 using GennadichGame.Enums;
 using GennadichGame.Scenes;
+using System.Collections;
 
 namespace GennadichGame.Manager
 {
-    public class SceneManager
+    public class SceneManager : IEnumerable<KeyValuePair<GameState, Scene>>
     {
         private Dictionary<GameState, Scene> Scenes { get; } = new Dictionary<GameState, Scene>();
         public Scene ActiveScene => Scenes.Values.FirstOrDefault(scene => scene.Active);
@@ -17,6 +18,7 @@ namespace GennadichGame.Manager
             get { return Scenes.FirstOrDefault(scene => scene.Value.Active).Key; }
             set { SetActiveScene(value); }
         }
+        public Scene this[GameState scene] => Scenes[scene];
         public SceneManager() { }
         public SceneManager(params KeyValuePair<GameState, Scene>[] scenes) => AddScene(scenes);
         public SceneManager(params (GameState state, Scene scene)[] scenes) => AddScene(scenes);
@@ -36,13 +38,25 @@ namespace GennadichGame.Manager
                 if (sc.Key == scene) sc.Value.Activate();
             }
         }
+        public Scene GetScene(GameState scene)
+        {
+            return Scenes[scene];
+        }
         public T GetScene<T>(GameState scene) where T : Scene
         {
-            return (T)Scenes.FirstOrDefault(sc => sc.Key == scene).Value;
+            return (T)Scenes[scene];
         }
         public IEnumerable<KeyValuePair<GameState, Scene>> GetScene<T>() where T : Scene
         {
             return Scenes.Where(scene => scene.Value.GetType() == typeof(T)).Select(scene => new KeyValuePair<GameState, Scene>(scene.Key, (T)scene.Value));
+        }
+        public IEnumerator<KeyValuePair<GameState, Scene>> GetEnumerator()
+        {
+            return Scenes.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Scenes.GetEnumerator();
         }
     }
 }

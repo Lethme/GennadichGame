@@ -89,6 +89,18 @@ namespace GennadichGame
                 (GameState.Game, new GDarts(this, TextureManager[Textures.Darts]))
             );
 
+            SceneManager[GameState.MainMenu].OnActivate += (scene) =>
+            {
+                BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
+                CursorManager.ActiveCursor = Cursor.Dart;
+            };
+
+            SceneManager[GameState.Game].OnActivate += (scene) =>
+            {
+                BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
+                CursorManager.ActiveCursor = Cursor.Dart;
+            };
+
             CursorManager.ActiveCursor = Cursor.Dart;
             BackgroundManager.ActiveBackground = BackgroundImage.None;
             SceneManager.ActiveState = GameState.MainMenu;
@@ -118,7 +130,7 @@ namespace GennadichGame
             {
                 GraphicsDevice.Clear(Color.White);
 
-                BackgroundManager.Draw();
+                BackgroundManager.DrawBackground();
 
                 SceneManager.ActiveScene.Draw(gameTime);
 

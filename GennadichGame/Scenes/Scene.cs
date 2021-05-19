@@ -6,8 +6,8 @@ using Microsoft.Xna.Framework;
 
 namespace GennadichGame.Scenes
 {
-    public delegate void ActivateHandler();
-    public delegate void DeactivateHandler();
+    public delegate void ActivateHandler(Scene scene);
+    public delegate void DeactivateHandler(Scene scene);
     public interface Scene
     {
         public bool Active { get; }

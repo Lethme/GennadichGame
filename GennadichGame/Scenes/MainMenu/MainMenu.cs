@@ -45,14 +45,6 @@ namespace GennadichGame.Scenes.Menu
             _items = new List<MainMenuItem>();
             _game = game;
 
-            OnActivate = () =>
-            {
-                _game.BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
-                _game.CursorManager.ActiveCursor = Cursor.Dart;
-            };
-
-            OnDeactivate = () => { };
-
             AddItem(items);
 
             _center = new Vector2(_game.Window.ClientBounds.Width / 2, _game.Window.ClientBounds.Height / 2);
@@ -90,12 +82,12 @@ namespace GennadichGame.Scenes.Menu
         public void Activate()
         {
             _active = true;
-            OnActivate.Invoke();
+            if (OnActivate != null) OnActivate.Invoke(this);
         }
         public void Deactivate()
         {
             _active = false;
-            OnDeactivate.Invoke();
+            if (OnDeactivate != null) OnDeactivate.Invoke(this);
         }
         public void Update(GameTime gameTime)
         {

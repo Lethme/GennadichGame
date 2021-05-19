@@ -43,14 +43,6 @@ namespace GennadichGame.Scenes.Darts
                 _game.Window.ClientBounds.Height / 2 - _dartsTex.Height * _dartsScale / 2
             );
 
-            OnActivate = () =>
-            {
-                _game.BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
-                _game.CursorManager.ActiveCursor = Cursor.Dart;
-            };
-
-            OnDeactivate = () => { };
-
             var segmentAngle = 360f / 20;
             _segments = new List<GDartsSegment>
             {
@@ -73,12 +65,12 @@ namespace GennadichGame.Scenes.Darts
         public void Activate()
         {
             _active = true;
-            OnActivate.Invoke();
+            if (OnActivate != null) OnActivate.Invoke(this);
         }
         public void Deactivate()
         {
             _active = false;
-            OnDeactivate.Invoke();
+            if (OnDeactivate != null) OnDeactivate.Invoke(this);
         }
         public void Update(GameTime gameTime)
         {

@@ -5,10 +5,11 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 
 using GennadichGame.Enums;
+using System.Collections;
 
 namespace GennadichGame.Manager
 {
-    public class TextureManager
+    public class TextureManager : IEnumerable<KeyValuePair<Textures, Texture2D>>
     {
         private Dictionary<Textures, Texture2D> Textures { get; } = new Dictionary<Textures, Texture2D>();
         public TextureManager() { }
@@ -24,5 +25,13 @@ namespace GennadichGame.Manager
             foreach (var texture in textures) Textures.Add(texture.textureID, texture.texture);
         }
         public Texture2D GetTexture(Textures texture) => Textures[texture];
+        public IEnumerator<KeyValuePair<Textures, Texture2D>> GetEnumerator()
+        {
+            return Textures.GetEnumerator();
+        }
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return Textures.GetEnumerator();
+        }
     }
 }
