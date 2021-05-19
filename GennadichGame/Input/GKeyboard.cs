@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 using Microsoft.Xna.Framework.Input;
 
-namespace GennadichGame
+namespace GennadichGame.Input
 {
-    public class Keyboard
+    public static class GKeyboard
     {
         static KeyboardState currentKeyState;
         static KeyboardState previousKeyState;
@@ -14,7 +11,7 @@ namespace GennadichGame
         public static KeyboardState GetState()
         {
             previousKeyState = currentKeyState;
-            currentKeyState = Microsoft.Xna.Framework.Input.Keyboard.GetState();
+            currentKeyState = Keyboard.GetState();
             return currentKeyState;
         }
 

@@ -7,59 +7,15 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace GennadichGame
-{
-    public class GDartsSegment
-    {
-        public double NearDistance { get; }
-        public double FarDistance { get; }
-        public float FirstAngle { get; }
-        public float SecondAngle { get; }
-        public GDartsSegment(double nearDistance, double farDistance, float firstAngle, float secondAngle)
-        {
-            if (nearDistance < 0 || nearDistance > 1 || farDistance < 0 || farDistance > 1)
-                throw new ArgumentOutOfRangeException("Distance must be in [0; 1]");
+using GennadichGame.Enums;
 
-            NearDistance = nearDistance;
-            FarDistance = farDistance;
-            FirstAngle = NormalizeAngle(firstAngle, AngleNormalizationFactor.AllowNegative);
-            SecondAngle = NormalizeAngle(secondAngle, AngleNormalizationFactor.AllowNegative);
-        }
-        public override string ToString()
-        {
-            return $"({NearDistance}; {FarDistance}), ({FirstAngle}; {SecondAngle})";
-        }
-        public static implicit operator GDartsSegment((double nearDistance, double farDistance, float firstAngle, float secondAngle) segment)
-        {
-            return new GDartsSegment(segment.nearDistance, segment.farDistance, segment.firstAngle, segment.secondAngle);
-        }
-        public static float NormalizeAngle(float angle, AngleNormalizationFactor factor = AngleNormalizationFactor.PositiveOnly)
-        {
-            switch (factor)
-            {
-                case AngleNormalizationFactor.AllowNegative:
-                {
-                    if (!(angle >= -360 && angle <= 360))
-                    {
-                        while (angle > 360) angle -= 360;
-                        while (angle < -360) angle += 360;
-                    }
-                    return angle;
-                }
-                default:
-                {
-                    if (!(angle >= 0 && angle <= 360))
-                    {
-                        while (angle > 360) angle -= 360;
-                        while (angle < 0) angle += 360;
-                    }
-                    return angle;
-                }
-            }
-        }
-    }
-    public class GDarts
+namespace GennadichGame.Scenes.Darts
+{
+    public class GDarts : Scene
     {
+        public bool Active { get; set; } = false;
+        public event ActivateHandler OnActivate;
+        public event DeactivateHandler OnDeactivate;
         private GennadichGame _game;
         private Texture2D _dartsTex;
         private float _dartsScale;
@@ -79,6 +35,13 @@ namespace GennadichGame
                 _game.Window.ClientBounds.Height / 2 - _dartsTex.Height * _dartsScale / 2
             );
 
+            OnActivate = () =>
+            {
+                _game.CurrentBackground = BackgroundImage.Clouds;
+                _game.CurrentCursor = Cursor.Dart;
+            };
+
+            OnDeactivate = () => { };
 
             var segmentAngle = 360f / 20;
             _segments = new List<GDartsSegment>();
@@ -96,11 +59,13 @@ namespace GennadichGame
                 _segments.Add((0.73, 0.78, angle, angle + segmentAngle));
             }
         }
-        public void Update()
+        public void Activate() => OnActivate.Invoke();
+        public void Deactivate() => OnDeactivate.Invoke();
+        public void Update(GameTime gameTime)
         {
-            _game.CurrentCursor = Cursor.Arrow;
+            
         }
-        public void Draw()
+        public void Draw(GameTime gameTime)
         {
             _game.SpriteBatch.Begin();
             

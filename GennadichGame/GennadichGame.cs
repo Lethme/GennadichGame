@@ -1,8 +1,16 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System;
-using System.Collections.Generic;
+
+using GennadichGame.Input;
+using GennadichGame.Enums;
+using GennadichGame.Scenes;
+using GennadichGame.Scenes.Menu;
+using GennadichGame.Scenes.Darts;
 
 namespace GennadichGame
 {
@@ -13,24 +21,31 @@ namespace GennadichGame
         private Texture2D _dartsTexture;
         private SpriteFont _spriteFont;
         private Point _windowSize;
-        private Texture2D _arrowCursorTex;
-        private Texture2D _pointerCursorTex;
         private Texture2D _currentCursorTex;
         private Texture2D _backgroundTex;
-        private GameState _gameState = GameState.MainMenu;
-        private Cursor _currentCursor = Cursor.Arrow;
+        private GameState _gameState;
+        private Cursor _currentCursor;
+        private BackgroundImage _currentBackground = BackgroundImage.Clouds;
         private MainMenu _mainMenu;
         private GDarts _darts;
-        public Dictionary<string, Texture2D> Backgrounds { get; }
+        public Dictionary<BackgroundImage, Texture2D> Backgrounds { get; }
+        private Dictionary<Cursor, Texture2D> Cursors { get; }
+        private Dictionary<GameState, Scene> Scenes { get; }
         public GraphicsDeviceManager Graphics => _graphics;
         public SpriteBatch SpriteBatch => _spriteBatch;
         public SpriteFont SpriteFont => _spriteFont;
         public Texture2D DartsTexture => _dartsTexture;
         public Vector2 CentralPoint { get; }
-        public Texture2D Background
+        public Scene ActiveScene => Scenes.Values.FirstOrDefault(scene => scene.Active);
+        public GameState CurrentScene
         {
-            get { return _backgroundTex; }
-            set { _backgroundTex = value; }
+            get { return _gameState; }
+            set { SetActiveScene(value); }
+        }
+        public BackgroundImage CurrentBackground
+        {
+            get { return _currentBackground; }
+            set { SetBackground(value); }
         }
         public Cursor CurrentCursor
         {
@@ -47,7 +62,9 @@ namespace GennadichGame
 
             CentralPoint = new Vector2(Window.ClientBounds.Width / 2, Window.ClientBounds.Height / 2);
 
-            Backgrounds = new Dictionary<string, Texture2D>();
+            Backgrounds = new Dictionary<BackgroundImage, Texture2D>();
+            Cursors = new Dictionary<Cursor, Texture2D>();
+            Scenes = new Dictionary<GameState, Scene>();
         }
         protected override void Initialize()
         {
@@ -66,13 +83,13 @@ namespace GennadichGame
             _dartsTexture = Content.Load<Texture2D>("img/board");
 
             _spriteFont = Content.Load<SpriteFont>("font/consolas16");
+            
+            Cursors.Add(Cursor.Arrow, Content.Load<Texture2D>("img/arrow"));
+            Cursors.Add(Cursor.Pointer, Content.Load<Texture2D>("img/pointer"));
+            Cursors.Add(Cursor.Dart, Content.Load<Texture2D>("img/dart"));
 
-            _arrowCursorTex = Content.Load<Texture2D>("img/arrow");
-            _pointerCursorTex = Content.Load<Texture2D>("img/pointer");
-
-            Backgrounds.Add("clouds", Content.Load<Texture2D>("img/background-1"));
-
-            CurrentCursor = Cursor.Arrow;
+            Backgrounds.Add(BackgroundImage.None, null);
+            Backgrounds.Add(BackgroundImage.Clouds, Content.Load<Texture2D>("img/background-1"));
 
             _mainMenu = new MainMenu(this, _spriteFont,
                 new MainMenuItem("Play offline", 0, () => { }),
@@ -82,42 +99,25 @@ namespace GennadichGame
             );
 
             _darts = new GDarts(this, _dartsTexture);
+
+            Scenes.Add(GameState.MainMenu, _mainMenu);
+            Scenes.Add(GameState.Game, _darts);
+
+            CurrentCursor = Cursor.Dart;
+            CurrentBackground = BackgroundImage.None;
+            CurrentScene = GameState.MainMenu;
         }
         protected override void Update(GameTime gameTime)
         {
             try
             {
-                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || GKeyboard.GetState().IsKeyDown(Keys.Escape))
                     Exit();
 
-                if (Keyboard.HasBeenPressed(Keys.F1)) _gameState = GameState.MainMenu;
-                if (Keyboard.HasBeenPressed(Keys.F2)) _gameState = GameState.Game;
+                if (GKeyboard.HasBeenPressed(Keys.F1)) CurrentScene = GameState.MainMenu;
+                if (GKeyboard.HasBeenPressed(Keys.F2)) CurrentScene = GameState.Game;
 
-                switch (_gameState)
-                {
-                    case GameState.StartScreen:
-                        {
-                            break;
-                        }
-                    case GameState.MainMenu:
-                        {
-                            UpdateMainMenu(gameTime);
-                            break;
-                        }
-                    case GameState.GameLobby:
-                        {
-                            break;
-                        }
-                    case GameState.Game:
-                        {
-                            UpdateGame(gameTime);
-                            break;
-                        }
-                    case GameState.Score:
-                        {
-                            break;
-                        }
-                }
+                ActiveScene.Update(gameTime);
 
                 base.Update(gameTime);
             }
@@ -139,31 +139,7 @@ namespace GennadichGame
                     _spriteBatch.End();
                 }
 
-                switch (_gameState)
-                {
-                    case GameState.StartScreen:
-                        {
-                            break;
-                        }
-                    case GameState.MainMenu:
-                        {
-                            DrawMainMenu(gameTime);
-                            break;
-                        }
-                    case GameState.GameLobby:
-                        {
-                            break;
-                        }
-                    case GameState.Game:
-                        {
-                            DrawGame(gameTime);
-                            break;
-                        }
-                    case GameState.Score:
-                        {
-                            break;
-                        }
-                }
+                ActiveScene.Draw(gameTime);
 
                 base.Draw(gameTime);
             }
@@ -171,6 +147,18 @@ namespace GennadichGame
             {
                 Console.WriteLine($"Draw method exception:\n\n{ex.Message}");
             }
+        }
+        private void SetBackground(Texture2D backgroundTexture)
+        {
+            if (_backgroundTex != backgroundTexture)
+            {
+                _backgroundTex = backgroundTexture;
+            }
+        }
+        private void SetBackground(BackgroundImage image)
+        {
+            _currentBackground = image;
+            SetBackground(Backgrounds[image]);
         }
         private void SetCursor(Texture2D cursorTexture)
         {
@@ -183,23 +171,24 @@ namespace GennadichGame
         public void SetCursor(Cursor cursor)
         {
             _currentCursor = cursor;
-            switch (cursor)
+            SetCursor(Cursors[cursor]);
+        }
+        public void SetActiveScene(GameState scene)
+        {
+            _gameState = scene;
+            if (ActiveScene != null)
             {
-                case Cursor.Pointer:
-                    {
-                        SetCursor(_pointerCursorTex);
-                        break;
-                    }
-                default:
-                    {
-                        SetCursor(_arrowCursorTex);
-                        break;
-                    }
+                ActiveScene.Deactivate();
+                ActiveScene.Active = false;
+            }
+            foreach (var sc in Scenes)
+            {
+                if (sc.Key == scene)
+                {
+                    sc.Value.Active = true;
+                    sc.Value.Activate();
+                }
             }
         }
-        private void UpdateMainMenu(GameTime gameTime) => _mainMenu.Update();
-        private void DrawMainMenu(GameTime gameTime) => _mainMenu.Draw();
-        private void UpdateGame(GameTime gameTime) => _darts.Update();
-        private void DrawGame(GameTime gameTime) => _darts.Draw();
     }
 }

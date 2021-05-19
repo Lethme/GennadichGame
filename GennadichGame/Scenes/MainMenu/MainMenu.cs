@@ -1,29 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
-namespace GennadichGame
+using GennadichGame.Enums;
+using GennadichGame.Input;
+
+namespace GennadichGame.Scenes.Menu
 {
-    public class MainMenuItem
+    public class MainMenu : Scene
     {
-        public String Text { get; set; }
-        public Point Size { get; set; }
-        public Rectangle Rect { get; set; }
-        public Action Action { get; set; }
-        public ActionType Type { get; }
-        public MainMenuItem(String text, ActionType actionType, Action action)
-        {
-            this.Text = text;
-            this.Action = action;
-            this.Type = actionType;
-        }
-    }
-    public class MainMenu
-    {
+        public bool Active { get; set; } = false;
+        public event ActivateHandler OnActivate;
+        public event DeactivateHandler OnDeactivate;
         private GennadichGame _game;
         private SpriteFont _font;
         private List<MainMenuItem> _items;
@@ -48,12 +39,18 @@ namespace GennadichGame
             _game = game;
             _font = spriteFont;
 
+            OnActivate = () =>
+            {
+                _game.CurrentBackground = BackgroundImage.Clouds;
+                _game.CurrentCursor = Cursor.Dart;
+            };
+
+            OnDeactivate = () => { };
+
             AddItem(items);
 
             _center = new Vector2(_game.Window.ClientBounds.Width / 2, _game.Window.ClientBounds.Height / 2);
             _itemHeight = _font.MeasureString(_items[0].Text).Y;
-
-            _game.Background = _game.Backgrounds["clouds"];
 
             _maxItemWidth = 0;
             
@@ -86,8 +83,10 @@ namespace GennadichGame
         {
             foreach (var item in items) _items.Add(item);
         }
+        public void Activate() => OnActivate.Invoke();
+        public void Deactivate() => OnDeactivate.Invoke();
         public void Invoke() => SelectedItem.Action.Invoke();
-        public void Update()
+        public void Update(GameTime gameTime)
         {
             _mousePosition = Mouse.GetState().Position;
 
@@ -97,28 +96,28 @@ namespace GennadichGame
             {
                 if (_items[i].Rect.Contains(_mousePosition))
                 {
-                    _game.CurrentCursor = Cursor.Pointer;
+                    //_game.CurrentCursor = Cursor.Pointer;
                     SelectedItemIndex = i;
                     _itemSelected = true;
                 }
             }
 
-            if (!_itemSelected) _game.CurrentCursor = Cursor.Arrow;
+            //if (!_itemSelected) _game.CurrentCursor = Cursor.Dart;
 
-            if (Keyboard.HasBeenPressed(Keys.Up))
+            if (GKeyboard.HasBeenPressed(Keys.Up))
             {
                 SelectedItemIndex -= 1;
             }
-            if (Keyboard.HasBeenPressed(Keys.Down))
+            if (GKeyboard.HasBeenPressed(Keys.Down))
             {
                 SelectedItemIndex += 1;
             }
-            if (SelectedItem.Type == ActionType.Update && (Keyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
+            if (SelectedItem.Type == ActionType.Update && (GKeyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
             {
                 Invoke();
             }
         }
-        public void Draw()
+        public void Draw(GameTime gameTime)
         {
             var position = new Vector2(_center.X, _center.Y - _items.Count / 2 * _itemHeight);
 
@@ -139,7 +138,7 @@ namespace GennadichGame
 
             _game.SpriteBatch.End();
 
-            if (SelectedItem.Type == ActionType.Draw && (Keyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
+            if (SelectedItem.Type == ActionType.Draw && (GKeyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
             {
                 Invoke();
             }

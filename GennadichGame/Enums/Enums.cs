@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace GennadichGame
+﻿namespace GennadichGame.Enums
 {
     public enum GameState
     {
@@ -15,7 +11,13 @@ namespace GennadichGame
     public enum Cursor
     {
         Arrow,
-        Pointer
+        Pointer,
+        Dart
+    }
+    public enum BackgroundImage
+    {
+        None,
+        Clouds
     }
     public enum AngleNormalizationFactor
     {
