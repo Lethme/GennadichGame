@@ -18,5 +18,9 @@ namespace GennadichGame.Scenes.Menu
             this.Action = action;
             this.Type = actionType;
         }
+        public static implicit operator MainMenuItem((String text, ActionType actionType, Action action) item)
+        {
+            return new MainMenuItem(item.text, item.actionType, item.action);
+        }
     }
 }

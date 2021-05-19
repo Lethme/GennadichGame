@@ -68,10 +68,10 @@ namespace GennadichGame
             _spriteFont = Content.Load<SpriteFont>("font/consolas16");
 
             _mainMenu = new MainMenu(this,
-                new MainMenuItem("Play offline", 0, () => { }),
-                new MainMenuItem("Create game", 0, () => { }),
-                new MainMenuItem("Connect to existing game", 0, () => { }),
-                new MainMenuItem("Exit", 0, () => Exit())
+                ("Play offline", 0, () => { }),
+                ("Create game", 0, () => { }),
+                ("Connect to existing game", 0, () => { }),
+                ("Exit", 0, () => Exit())
             );
 
             _darts = new GDarts(this, TextureManager[Textures.Darts]);
