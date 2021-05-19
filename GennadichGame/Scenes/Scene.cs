@@ -10,7 +10,7 @@ namespace GennadichGame.Scenes
     public delegate void DeactivateHandler();
     public interface Scene
     {
-        public bool Active { get; set; }
+        public bool Active { get; }
         public event ActivateHandler OnActivate;
         public event DeactivateHandler OnDeactivate;
         public void Activate();

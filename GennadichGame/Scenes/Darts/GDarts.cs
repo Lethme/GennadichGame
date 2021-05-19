@@ -13,17 +13,25 @@ namespace GennadichGame.Scenes.Darts
 {
     public class GDarts : Scene
     {
-        public bool Active { get; set; } = false;
+        #region Interface
+        private bool _active = false;
+        public bool Active => _active;
         public event ActivateHandler OnActivate;
         public event DeactivateHandler OnDeactivate;
+        #endregion
+        #region Data
         private GennadichGame _game;
         private Texture2D _dartsTex;
         private float _dartsScale;
         private Vector2 _dartsPosition;
         private List<GDartsSegment> _segments;
+        #endregion
+        #region Properties
         public Vector2 DartsCenter => _dartsPosition + DartsSize / 2;
         public Vector2 DartsSize => new Vector2(_dartsTex.Width * _dartsScale, _dartsTex.Height * _dartsScale);
         public GDartsSegment IntersectedSegment => _segments.FirstOrDefault(segment => Intersects(segment));
+        #endregion
+        #region Constructors
         public GDarts(GennadichGame game, Texture2D dartsTex)
         {
             _game = game;
@@ -37,19 +45,20 @@ namespace GennadichGame.Scenes.Darts
 
             OnActivate = () =>
             {
-                _game.CurrentBackground = BackgroundImage.Clouds;
-                _game.CurrentCursor = Cursor.Dart;
+                _game.BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
+                _game.CursorManager.ActiveCursor = Cursor.Dart;
             };
 
             OnDeactivate = () => { };
 
             var segmentAngle = 360f / 20;
-            _segments = new List<GDartsSegment>();
-
-            _segments.Add((0, 0.02, 0, 360));
-            _segments.Add((0.02, 0.04, 0, 360));
-            _segments.Add((0.04, 0.07, 0, 360));
-            _segments.Add((0.78, 1, 0, 360));
+            _segments = new List<GDartsSegment>
+            {
+                (0, 0.02, 0, 360),
+                (0.02, 0.04, 0, 360),
+                (0.04, 0.07, 0, 360),
+                (0.78, 1, 0, 360)
+            };
 
             for (var angle = 0f; angle < 360; angle += segmentAngle)
             {
@@ -59,8 +68,18 @@ namespace GennadichGame.Scenes.Darts
                 _segments.Add((0.73, 0.78, angle, angle + segmentAngle));
             }
         }
-        public void Activate() => OnActivate.Invoke();
-        public void Deactivate() => OnDeactivate.Invoke();
+        #endregion
+        #region InterfaceMethods
+        public void Activate()
+        {
+            _active = true;
+            OnActivate.Invoke();
+        }
+        public void Deactivate()
+        {
+            _active = false;
+            OnDeactivate.Invoke();
+        }
         public void Update(GameTime gameTime)
         {
             
@@ -78,6 +97,8 @@ namespace GennadichGame.Scenes.Darts
 
             _game.SpriteBatch.End();
         }
+        #endregion
+        #region PrivateMethods
         private bool Intersects(GDartsSegment segment)
         {
             var position = GetMousePositionParams();
@@ -111,5 +132,8 @@ namespace GennadichGame.Scenes.Darts
 
             return (distance, GDartsSegment.NormalizeAngle(angle, AngleNormalizationFactor.AllowNegative));
         }
+        #endregion
+        #region PublicMethods
+        #endregion
     }
 }

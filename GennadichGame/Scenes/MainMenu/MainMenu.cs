@@ -12,11 +12,14 @@ namespace GennadichGame.Scenes.Menu
 {
     public class MainMenu : Scene
     {
-        public bool Active { get; set; } = false;
+        #region Interface
+        private bool _active = false;
+        public bool Active => _active;
         public event ActivateHandler OnActivate;
         public event DeactivateHandler OnDeactivate;
+        #endregion
+        #region Data
         private GennadichGame _game;
-        private SpriteFont _font;
         private List<MainMenuItem> _items;
         private Point _mousePosition;
         private Texture2D _selectedItemRect;
@@ -26,6 +29,8 @@ namespace GennadichGame.Scenes.Menu
         private Vector2 _center;
         private float _itemHeight;
         private float _maxItemWidth;
+        #endregion
+        #region Properties
         private MainMenuItem SelectedItem => _items[_selectedItemIndex];
         private int SelectedItemIndex 
         { 
@@ -33,16 +38,17 @@ namespace GennadichGame.Scenes.Menu
             set { if (!(value < 0 || value > ItemsCount - 1)) _selectedItemIndex = value; }
         }
         public int ItemsCount => _items.Count;
-        public MainMenu(GennadichGame game, SpriteFont spriteFont, params MainMenuItem[] items)
+        #endregion
+        #region Constructors
+        public MainMenu(GennadichGame game, params MainMenuItem[] items)
         {
             _items = new List<MainMenuItem>();
             _game = game;
-            _font = spriteFont;
 
             OnActivate = () =>
             {
-                _game.CurrentBackground = BackgroundImage.Clouds;
-                _game.CurrentCursor = Cursor.Dart;
+                _game.BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
+                _game.CursorManager.ActiveCursor = Cursor.Dart;
             };
 
             OnDeactivate = () => { };
@@ -50,13 +56,13 @@ namespace GennadichGame.Scenes.Menu
             AddItem(items);
 
             _center = new Vector2(_game.Window.ClientBounds.Width / 2, _game.Window.ClientBounds.Height / 2);
-            _itemHeight = _font.MeasureString(_items[0].Text).Y;
+            _itemHeight = _game.SpriteFont.MeasureString(_items[0].Text).Y;
 
             _maxItemWidth = 0;
             
             foreach (var item in _items)
             {
-                var width = _font.MeasureString(item.Text).X;
+                var width = _game.SpriteFont.MeasureString(item.Text).X;
                 item.Size = new Point((int)width, (int)_itemHeight);
                 if (width > _maxItemWidth) _maxItemWidth = width;
             }
@@ -79,13 +85,18 @@ namespace GennadichGame.Scenes.Menu
             _selectedItemRect = new Texture2D(_game.Graphics.GraphicsDevice, 1, 1);
             _selectedItemRect.SetData(new[] { Color.White });
         }
-        public void AddItem(params MainMenuItem[] items)
+        #endregion
+        #region InterfaceMethods
+        public void Activate()
         {
-            foreach (var item in items) _items.Add(item);
+            _active = true;
+            OnActivate.Invoke();
         }
-        public void Activate() => OnActivate.Invoke();
-        public void Deactivate() => OnDeactivate.Invoke();
-        public void Invoke() => SelectedItem.Action.Invoke();
+        public void Deactivate()
+        {
+            _active = false;
+            OnDeactivate.Invoke();
+        }
         public void Update(GameTime gameTime)
         {
             _mousePosition = Mouse.GetState().Position;
@@ -132,7 +143,7 @@ namespace GennadichGame.Scenes.Menu
 
             foreach (var item in _items)
             {
-                _game.SpriteBatch.DrawString(_font, item.Text, new Vector2(position.X - _font.MeasureString(item.Text).X / 2, position.Y), Color.Black);
+                _game.SpriteBatch.DrawString(_game.SpriteFont, item.Text, new Vector2(position.X - _game.SpriteFont.MeasureString(item.Text).X / 2, position.Y), Color.Black);
                 position.Y += _itemHeight;
             }
 
@@ -143,5 +154,15 @@ namespace GennadichGame.Scenes.Menu
                 Invoke();
             }
         }
+        #endregion
+        #region PrivateMethods
+        #endregion
+        #region PublicMethods
+        public void Invoke() => SelectedItem.Action.Invoke();
+        public void AddItem(params MainMenuItem[] items)
+        {
+            foreach (var item in items) _items.Add(item);
+        }
+        #endregion
     }
 }
