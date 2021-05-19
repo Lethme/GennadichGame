@@ -20,8 +20,6 @@ namespace GennadichGame
         private SpriteBatch _spriteBatch;
         private SpriteFont _spriteFont;
         private Point _windowSize;
-        private MainMenu _mainMenu;
-        private GDarts _darts;
         public TextureManager TextureManager { get; }
         public BackgroundManager BackgroundManager { get; }
         public CursorManager CursorManager { get; }
@@ -67,15 +65,6 @@ namespace GennadichGame
 
             _spriteFont = Content.Load<SpriteFont>("font/consolas16");
 
-            _mainMenu = new MainMenu(this,
-                ("Play offline", 0, () => { }),
-                ("Create game", 0, () => { }),
-                ("Connect to existing game", 0, () => { }),
-                ("Exit", 0, () => Exit())
-            );
-
-            _darts = new GDarts(this, TextureManager[Textures.Darts]);
-
             CursorManager.AddCursor
             (
                 (Cursor.Arrow, TextureManager[Textures.ArrowCursor]),
@@ -91,8 +80,13 @@ namespace GennadichGame
 
             SceneManager.AddScene
             (
-                (GameState.MainMenu, _mainMenu),
-                (GameState.Game, _darts)
+                (GameState.MainMenu, new MainMenu(this,
+                    ("Play offline", 0, () => { }),
+                    ("Create game", 0, () => { }),
+                    ("Connect to existing game", 0, () => { }),
+                    ("Exit", 0, () => Exit())
+                )),
+                (GameState.Game, new GDarts(this, TextureManager[Textures.Darts]))
             );
 
             CursorManager.ActiveCursor = Cursor.Dart;
