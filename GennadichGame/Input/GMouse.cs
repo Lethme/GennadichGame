@@ -1,19 +1,33 @@
 ﻿using System;
+using System.Linq;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 using GennadichGame.Enums;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace GennadichGame.Input
 {
+    #region MouseEventDelegates
     public delegate void MouseEventHandler(MouseState state);
     public delegate void MouseMoveEventHandler(MouseState state, Direction direction);
+    public delegate void MouseButtonEventHandler(MouseState state, IEnumerable<MouseButton> buttons);
+    #endregion
     public static class GMouse
     {
+        #region Data
         private static MouseState currentState = Mouse.GetState();
         private static MouseState previousState;
         private static Direction currentDirection = Direction.Up;
+        private static Random Rnd { get; } = new Random();
+        #endregion
+        #region Properties
+        public static bool AlkashCursor { get; set; } = false;
+        public static Point Position => Mouse.GetState().Position;
+        #endregion
+        #region Events
         public static event MouseEventHandler OnLeftButtonDown;
         public static event MouseEventHandler OnLeftButtonPressed;
         public static event MouseEventHandler OnLeftButtonReleased;
@@ -29,10 +43,12 @@ namespace GennadichGame.Input
         public static event MouseEventHandler OnXButton2Down;
         public static event MouseEventHandler OnXButton2Pressed;
         public static event MouseEventHandler OnXButton2Released;
+        public static event MouseButtonEventHandler OnButtonDown;
+        public static event MouseButtonEventHandler OnButtonPressed;
+        public static event MouseButtonEventHandler OnButtonReleased;
         public static event MouseMoveEventHandler OnMouseMove;
-        private static Random Rnd { get; } = new Random();
-        public static bool AlkashCursor { get; set; } = false;
-        public static Point Position => Mouse.GetState().Position;
+        #endregion
+        #region PublicMethods
         public static MouseState GetState()
         {
             previousState = currentState;
@@ -44,34 +60,33 @@ namespace GennadichGame.Input
             previousState = currentState;
             currentState = Mouse.GetState();
 
-            if (OnLeftButtonDown != null && IsLeftButtonDown()) OnLeftButtonDown.Invoke(currentState);
-            if (OnLeftButtonPressed != null && IsLeftButtonPressed()) OnLeftButtonPressed.Invoke(currentState);
-            if (OnLeftButtonReleased != null && currentState.LeftButton != ButtonState.Pressed && previousState.LeftButton == ButtonState.Pressed) OnLeftButtonReleased.Invoke(currentState);
+            if (OnLeftButtonDown != null && IsButtonDown(MouseButton.Left)) OnLeftButtonDown.Invoke(currentState);
+            if (OnLeftButtonPressed != null && IsButtonPressed(MouseButton.Left)) OnLeftButtonPressed.Invoke(currentState);
+            if (OnLeftButtonReleased != null && IsButtonReleased(MouseButton.Left)) OnLeftButtonReleased.Invoke(currentState);
 
-            if (OnRightButtonDown != null && IsRightButtonDown()) OnRightButtonDown.Invoke(currentState);
-            if (OnRightButtonPressed != null && IsRightButtonPressed()) OnRightButtonPressed.Invoke(currentState);
-            if (OnRightButtonReleased != null && currentState.RightButton != ButtonState.Pressed && previousState.RightButton == ButtonState.Pressed) OnRightButtonReleased.Invoke(currentState);
+            if (OnRightButtonDown != null && IsButtonDown(MouseButton.Right)) OnRightButtonDown.Invoke(currentState);
+            if (OnRightButtonPressed != null && IsButtonPressed(MouseButton.Right)) OnRightButtonPressed.Invoke(currentState);
+            if (OnRightButtonReleased != null && IsButtonReleased(MouseButton.Right)) OnRightButtonReleased.Invoke(currentState);
 
-            if (OnMiddleButtonDown != null && IsMiddleButtonDown()) OnMiddleButtonDown.Invoke(currentState);
-            if (OnMiddleButtonPressed != null && IsMiddleButtonPressed()) OnMiddleButtonPressed.Invoke(currentState);
-            if (OnMiddleButtonReleased != null && currentState.MiddleButton != ButtonState.Pressed && previousState.MiddleButton == ButtonState.Pressed) OnMiddleButtonReleased.Invoke(currentState);
+            if (OnMiddleButtonDown != null && IsButtonDown(MouseButton.Middle)) OnMiddleButtonDown.Invoke(currentState);
+            if (OnMiddleButtonPressed != null && IsButtonPressed(MouseButton.Middle)) OnMiddleButtonPressed.Invoke(currentState);
+            if (OnMiddleButtonReleased != null && IsButtonReleased(MouseButton.Middle)) OnMiddleButtonReleased.Invoke(currentState);
 
-            if (OnXButton1Down != null && IsXButton1Down()) OnXButton1Down.Invoke(currentState);
-            if (OnXButton1Pressed != null && IsXButton1Pressed()) OnXButton1Pressed.Invoke(currentState);
-            if (OnXButton1Released != null && currentState.XButton1 != ButtonState.Pressed && previousState.XButton1 == ButtonState.Pressed) OnXButton1Released.Invoke(currentState);
+            if (OnXButton1Down != null && IsButtonDown(MouseButton.XButton1)) OnXButton1Down.Invoke(currentState);
+            if (OnXButton1Pressed != null && IsButtonPressed(MouseButton.XButton1)) OnXButton1Pressed.Invoke(currentState);
+            if (OnXButton1Released != null && IsButtonReleased(MouseButton.XButton1)) OnXButton1Released.Invoke(currentState);
 
-            if (OnXButton2Down != null && IsXButton2Down()) OnXButton2Down.Invoke(currentState);
-            if (OnXButton2Pressed != null && IsXButton2Pressed()) OnXButton2Pressed.Invoke(currentState);
-            if (OnXButton2Released != null && currentState.XButton2 != ButtonState.Pressed && previousState.XButton2 == ButtonState.Pressed) OnXButton2Released.Invoke(currentState);
+            if (OnXButton2Down != null && IsButtonDown(MouseButton.XButton2)) OnXButton2Down.Invoke(currentState);
+            if (OnXButton2Pressed != null && IsButtonPressed(MouseButton.XButton2)) OnXButton2Pressed.Invoke(currentState);
+            if (OnXButton2Released != null && IsButtonReleased(MouseButton.XButton2)) OnXButton2Released.Invoke(currentState);
 
-            if (OnMouseMove != null && IsMouseMoving()) OnMouseMove.Invoke(currentState, GetMouseMoveDirection());
+            if (OnButtonDown != null && IsButtonDown(MouseButton.Any)) OnButtonDown.Invoke(currentState, GetDownButtons());
+            if (OnButtonPressed != null && IsButtonPressed(MouseButton.Any)) OnButtonPressed.Invoke(currentState, GetPressedButtons());
+            if (OnButtonReleased != null && IsButtonReleased(MouseButton.Any)) OnButtonReleased.Invoke(currentState, GetReleasedButtons());
+
+            if (OnMouseMove != null && IsMouseMoving()) OnMouseMove.Invoke(currentState, GetMoveDirection());
 
             if (AlkashCursor) Alkashize();
-        }
-        private static void Alkashize()
-        {
-            currentDirection = (Direction)Rnd.Next(0, 8);
-            MoveCursor(currentDirection, 2);
         }
         public static void MoveCursor(Direction direction, int pixels = 1)
         {
@@ -128,7 +143,7 @@ namespace GennadichGame.Input
         {
             Mouse.SetPosition(x, y);
         }
-        public static Direction GetMouseMoveDirection()
+        public static Direction GetMoveDirection()
         {
             var posDiff = currentState.Position - previousState.Position;
             if (posDiff.X == 0 && posDiff.Y < 0) return Direction.Up;
@@ -139,52 +154,115 @@ namespace GennadichGame.Input
             if (posDiff.X > 0 && posDiff.Y < 0) return Direction.UpRight;
             if (posDiff.X < 0 && posDiff.Y > 0) return Direction.DownLeft;
             if (posDiff.X > 0 && posDiff.Y > 0) return Direction.DownRight;
-            
+
             return Direction.None;
+        }
+        public static ButtonState GetButtonState(MouseButton button)
+        {
+            var mouseState = GetState();
+            switch (button)
+            {
+                case MouseButton.Left: { return mouseState.LeftButton; }
+                case MouseButton.Right: { return mouseState.RightButton; }
+                case MouseButton.Middle: { return mouseState.MiddleButton; }
+                case MouseButton.XButton1: { return mouseState.XButton1; }
+                case MouseButton.XButton2: { return mouseState.XButton2; }
+                default: return ButtonState.Released;
+            }
+        }
+        public static ButtonState GetCurrentButtonState(MouseButton button)
+        {
+            switch (button)
+            {
+                case MouseButton.Left: { return currentState.LeftButton; }
+                case MouseButton.Right: { return currentState.RightButton; }
+                case MouseButton.Middle: { return currentState.MiddleButton; }
+                case MouseButton.XButton1: { return currentState.XButton1; }
+                case MouseButton.XButton2: { return currentState.XButton2; }
+                default: return ButtonState.Released;
+            }
+        }
+        public static ButtonState GetPreviousButtonState(MouseButton button)
+        {
+            switch (button)
+            {
+                case MouseButton.Left: { return previousState.LeftButton; }
+                case MouseButton.Right: { return previousState.RightButton; }
+                case MouseButton.Middle: { return previousState.MiddleButton; }
+                case MouseButton.XButton1: { return previousState.XButton1; }
+                case MouseButton.XButton2: { return previousState.XButton2; }
+                default: return ButtonState.Released;
+            }
+        }
+        public static IEnumerable<MouseButton> GetDownButtons()
+        {
+            foreach (MouseButton btn in Enum.GetValues(typeof(MouseButton)))
+            {
+                if (btn != MouseButton.Any && IsButtonDown(btn)) yield return btn;
+            }
+        }
+        public static IEnumerable<MouseButton> GetPressedButtons()
+        {
+            foreach (MouseButton btn in Enum.GetValues(typeof(MouseButton)))
+            {
+                if (btn != MouseButton.Any && IsButtonPressed(btn)) yield return btn;
+            }
+        }
+        public static IEnumerable<MouseButton> GetReleasedButtons()
+        {
+            foreach (MouseButton btn in Enum.GetValues(typeof(MouseButton)))
+            {
+                if (btn != MouseButton.Any && IsButtonReleased(btn)) yield return btn;
+            }
+        }
+        public static bool IsButtonPressed(MouseButton button)
+        {
+            if (button == MouseButton.Any)
+            {
+                return CheckButtonState(btn => GetCurrentButtonState(btn) == ButtonState.Pressed && GetPreviousButtonState(btn) != ButtonState.Pressed);
+            }
+
+            return GetCurrentButtonState(button) == ButtonState.Pressed && GetPreviousButtonState(button) != ButtonState.Pressed;
+        }
+        public static bool IsButtonDown(MouseButton button)
+        {
+            if (button == MouseButton.Any)
+            {
+                return CheckButtonState(btn => GetCurrentButtonState(btn) == ButtonState.Pressed && !IsButtonPressed(btn));
+            }
+
+            return GetCurrentButtonState(button) == ButtonState.Pressed && !IsButtonPressed(button);
+        }
+        public static bool IsButtonReleased(MouseButton button)
+        {
+            if (button == MouseButton.Any)
+            {
+                return CheckButtonState(btn => GetCurrentButtonState(btn) != ButtonState.Pressed && GetPreviousButtonState(btn) == ButtonState.Pressed);
+            }
+
+            return GetCurrentButtonState(button) != ButtonState.Pressed && GetPreviousButtonState(button) == ButtonState.Pressed;
         }
         public static bool IsMouseMoving()
         {
             return currentState.Position != previousState.Position;
         }
-        public static bool IsLeftButtonDown()
+        #endregion
+        #region PrivateMethods
+        private static void Alkashize()
         {
-            return currentState.LeftButton == ButtonState.Pressed && !IsLeftButtonPressed();
+            currentDirection = (Direction)Rnd.Next(0, 8);
+            MoveCursor(currentDirection, 2);
         }
-        public static bool IsLeftButtonPressed()
+        private static bool CheckButtonState(Func<MouseButton, bool> func)
         {
-            return currentState.LeftButton == ButtonState.Pressed && previousState.LeftButton != ButtonState.Pressed;
+            foreach (MouseButton btn in Enum.GetValues(typeof(MouseButton)))
+            {
+                var flg = func.Invoke(btn);
+                if (flg) return true;
+            }
+
+            return false;
         }
-        public static bool IsRightButtonDown()
-        {
-            return currentState.RightButton == ButtonState.Pressed && !IsRightButtonPressed();
-        }
-        public static bool IsRightButtonPressed()
-        {
-            return currentState.RightButton == ButtonState.Pressed && previousState.RightButton != ButtonState.Pressed;
-        }
-        public static bool IsMiddleButtonDown()
-        {
-            return currentState.MiddleButton == ButtonState.Pressed && !IsMiddleButtonPressed();
-        }
-        public static bool IsMiddleButtonPressed()
-        {
-            return currentState.MiddleButton == ButtonState.Pressed && previousState.MiddleButton != ButtonState.Pressed;
-        }
-        public static bool IsXButton1Down()
-        {
-            return currentState.XButton1 == ButtonState.Pressed && !IsXButton1Pressed();
-        }
-        public static bool IsXButton1Pressed()
-        {
-            return currentState.XButton1 == ButtonState.Pressed && previousState.XButton1 != ButtonState.Pressed;
-        }
-        public static bool IsXButton2Down()
-        {
-            return currentState.XButton2 == ButtonState.Pressed;
-        }
-        public static bool IsXButton2Pressed()
-        {
-            return currentState.XButton2 == ButtonState.Pressed && previousState.XButton2 != ButtonState.Pressed;
-        }
+        #endregion
     }
 }

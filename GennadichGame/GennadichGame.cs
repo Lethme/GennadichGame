@@ -16,17 +16,24 @@ namespace GennadichGame
 {
     public class GennadichGame : Game
     {
+        #region Data
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private SpriteFont _spriteFont;
         private Point _windowSize;
+        #endregion
+        #region Managers
         public TextureManager TextureManager { get; }
         public BackgroundManager BackgroundManager { get; }
         public CursorManager CursorManager { get; }
         private SceneManager SceneManager { get; }
+        #endregion
+        #region Properties
         public GraphicsDeviceManager Graphics => _graphics;
         public SpriteBatch SpriteBatch => _spriteBatch;
         public SpriteFont SpriteFont => _spriteFont;
+        #endregion
+        #region Constructors
         public GennadichGame(int width, int height)
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -40,6 +47,8 @@ namespace GennadichGame
             CursorManager = new CursorManager();
             SceneManager = new SceneManager();
         }
+        #endregion
+        #region ProtectedMethods
         protected override void Initialize()
         {
             _graphics.PreferredBackBufferWidth = _windowSize.X;
@@ -148,5 +157,6 @@ namespace GennadichGame
                 Console.WriteLine($"Draw method exception:\n\n{ex.Message}");
             }
         }
+        #endregion
     }
 }
