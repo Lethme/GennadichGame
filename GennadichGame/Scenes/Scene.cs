@@ -4,15 +4,17 @@ using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
 
+using GennadichGame.Enums;
+
 namespace GennadichGame.Scenes
 {
-    public delegate void ActivateHandler(Scene scene);
-    public delegate void DeactivateHandler(Scene scene);
+    public delegate void ActivateEventHandler();
+    public delegate void DeactivateEventHandler(Scene scene);
     public interface Scene
     {
         public bool Active { get; }
-        public event ActivateHandler OnActivate;
-        public event DeactivateHandler OnDeactivate;
+        public event ActivateEventHandler OnActivate;
+        public event DeactivateEventHandler OnDeactivate;
         public void Activate();
         public void Deactivate();
         public void Update(GameTime gameTime);

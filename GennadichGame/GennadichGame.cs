@@ -98,13 +98,13 @@ namespace GennadichGame
                 (GameState.Game, new GDarts(this, TextureManager[Textures.Darts]))
             );
 
-            SceneManager[GameState.MainMenu].OnActivate += (scene) =>
+            SceneManager[GameState.MainMenu].OnActivate += () =>
             {
                 BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
                 CursorManager.ActiveCursor = Cursor.Dart;
             };
 
-            SceneManager[GameState.Game].OnActivate += (scene) =>
+            SceneManager[GameState.Game].OnActivate += () =>
             {
                 BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
                 CursorManager.ActiveCursor = Cursor.Dart;
@@ -137,7 +137,7 @@ namespace GennadichGame
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Update method exception:\n\n{ex.Message}");
+                Console.WriteLine($"Update method exception:\n{ex.Message}");
             }
         }
         protected override void Draw(GameTime gameTime)
@@ -154,7 +154,7 @@ namespace GennadichGame
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Draw method exception:\n\n{ex.Message}");
+                Console.WriteLine($"Draw method exception:\n{ex.Message}");
             }
         }
         #endregion

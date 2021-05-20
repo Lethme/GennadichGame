@@ -16,8 +16,8 @@ namespace GennadichGame.Scenes.Darts
         #region Interface
         private bool _active = false;
         public bool Active => _active;
-        public event ActivateHandler OnActivate;
-        public event DeactivateHandler OnDeactivate;
+        public event ActivateEventHandler OnActivate;
+        public event DeactivateEventHandler OnDeactivate;
         #endregion
         #region Data
         private GennadichGame _game;
@@ -65,7 +65,7 @@ namespace GennadichGame.Scenes.Darts
         public void Activate()
         {
             _active = true;
-            if (OnActivate != null) OnActivate.Invoke(this);
+            if (OnActivate != null) OnActivate.Invoke();
         }
         public void Deactivate()
         {

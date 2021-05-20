@@ -21,7 +21,7 @@ namespace GennadichGame.Input
         private static MouseState currentState = Mouse.GetState();
         private static MouseState previousState;
         private static Direction currentDirection = Direction.Up;
-        private static Random Rnd { get; } = new Random(int.MaxValue);
+        private static Random Rnd { get; } = new Random();
         #endregion
         #region Properties
         public static bool AlkashCursor { get; set; } = false;
@@ -62,6 +62,8 @@ namespace GennadichGame.Input
             previousState = currentState;
             currentState = Mouse.GetState();
 
+            if (AlkashCursor) Alkashize();
+
             if (OnLeftButtonDown != null && IsButtonDown(MouseButton.Left)) OnLeftButtonDown.Invoke(currentState);
             if (OnLeftButtonPressed != null && IsButtonPressed(MouseButton.Left)) OnLeftButtonPressed.Invoke(currentState);
             if (OnLeftButtonReleased != null && IsButtonReleased(MouseButton.Left)) OnLeftButtonReleased.Invoke(currentState);
@@ -90,8 +92,6 @@ namespace GennadichGame.Input
             if (OnMouseWheelDown != null && IsMouseWheelDown()) OnMouseWheelDown.Invoke(currentState);
 
             if (OnMouseMove != null && IsMouseMoving()) OnMouseMove.Invoke(currentState, GetMoveDirection());
-
-            if (AlkashCursor) Alkashize();
         }
         public static void MoveCursor(Direction direction, int pixels = 1)
         {

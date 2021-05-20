@@ -9,8 +9,10 @@ using System.Collections;
 
 namespace GennadichGame.Manager
 {
+    public delegate void SceneChangedEventHandler(GameState previousState);
     public class SceneManager : IEnumerable<KeyValuePair<GameState, Scene>>
     {
+        public event SceneChangedEventHandler OnSceneChanged;
         private Dictionary<GameState, Scene> Scenes { get; } = new Dictionary<GameState, Scene>();
         public Scene ActiveScene => Scenes.Values.FirstOrDefault(scene => scene.Active);
         public GameState ActiveState
@@ -32,11 +34,18 @@ namespace GennadichGame.Manager
         }
         public void SetActiveScene(GameState scene)
         {
-            if (ActiveScene != null) ActiveScene.Deactivate();
+            if (ActiveState == scene) return;
+
+            var currentState = ActiveState;
+            var currentScene = ActiveScene;
+
+            if (currentScene != null) currentScene.Deactivate();
             foreach (var sc in Scenes)
             {
                 if (sc.Key == scene) sc.Value.Activate();
             }
+
+            if (OnSceneChanged != null) OnSceneChanged.Invoke(currentState);
         }
         public Scene GetScene(GameState scene)
         {
