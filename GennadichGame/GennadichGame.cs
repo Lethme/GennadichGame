@@ -114,6 +114,13 @@ namespace GennadichGame
 
                 if (GKeyboard.HasBeenPressed(Keys.F1)) SceneManager.ActiveState = GameState.MainMenu;
                 if (GKeyboard.HasBeenPressed(Keys.F2)) SceneManager.ActiveState = GameState.Game;
+                if (GKeyboard.HasBeenPressed(Keys.A))
+                {
+                    if (GMouse.AlkashCursor) GMouse.AlkashCursor = false;
+                    else GMouse.AlkashCursor = true;
+                }
+
+                GMouse.UpdateState();
 
                 SceneManager.ActiveScene.Update(gameTime);
 

@@ -5,24 +5,21 @@ namespace GennadichGame.Input
 {
     public static class GKeyboard
     {
-        static KeyboardState currentKeyState;
-        static KeyboardState previousKeyState;
-
+        static KeyboardState currentState;
+        static KeyboardState previousState;
         public static KeyboardState GetState()
         {
-            previousKeyState = currentKeyState;
-            currentKeyState = Keyboard.GetState();
-            return currentKeyState;
+            previousState = currentState;
+            currentState = Keyboard.GetState();
+            return currentState;
         }
-
         public static bool IsPressed(Keys key)
         {
-            return currentKeyState.IsKeyDown(key);
+            return currentState.IsKeyDown(key);
         }
-
         public static bool HasBeenPressed(Keys key)
         {
-            return currentKeyState.IsKeyDown(key) && !previousKeyState.IsKeyDown(key);
+            return currentState.IsKeyDown(key) && !previousState.IsKeyDown(key);
         }
     }
 }

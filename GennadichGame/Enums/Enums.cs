@@ -37,4 +37,16 @@
         Update,
         Draw
     }
+    public enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right,
+        UpLeft,
+        UpRight,
+        DownLeft,
+        DownRight,
+        None = -1,
+    }
 }
