@@ -21,7 +21,7 @@ namespace GennadichGame.Input
         private static MouseState currentState = Mouse.GetState();
         private static MouseState previousState;
         private static Direction currentDirection = Direction.Up;
-        private static Random Rnd { get; } = new Random();
+        private static Random Rnd { get; } = new Random(int.MaxValue);
         #endregion
         #region Properties
         public static bool AlkashCursor { get; set; } = false;
@@ -43,6 +43,8 @@ namespace GennadichGame.Input
         public static event MouseEventHandler OnXButton2Down;
         public static event MouseEventHandler OnXButton2Pressed;
         public static event MouseEventHandler OnXButton2Released;
+        public static event MouseEventHandler OnMouseWheelUp;
+        public static event MouseEventHandler OnMouseWheelDown;
         public static event MouseButtonEventHandler OnButtonDown;
         public static event MouseButtonEventHandler OnButtonPressed;
         public static event MouseButtonEventHandler OnButtonReleased;
@@ -83,6 +85,9 @@ namespace GennadichGame.Input
             if (OnButtonDown != null && IsButtonDown(MouseButton.Any)) OnButtonDown.Invoke(currentState, GetDownButtons());
             if (OnButtonPressed != null && IsButtonPressed(MouseButton.Any)) OnButtonPressed.Invoke(currentState, GetPressedButtons());
             if (OnButtonReleased != null && IsButtonReleased(MouseButton.Any)) OnButtonReleased.Invoke(currentState, GetReleasedButtons());
+
+            if (OnMouseWheelUp != null && IsMouseWheelUp()) OnMouseWheelUp.Invoke(currentState);
+            if (OnMouseWheelDown != null && IsMouseWheelDown()) OnMouseWheelDown.Invoke(currentState);
 
             if (OnMouseMove != null && IsMouseMoving()) OnMouseMove.Invoke(currentState, GetMoveDirection());
 
@@ -245,6 +250,14 @@ namespace GennadichGame.Input
         public static bool IsMouseMoving()
         {
             return currentState.Position != previousState.Position;
+        }
+        public static bool IsMouseWheelUp()
+        {
+            return currentState.ScrollWheelValue > previousState.ScrollWheelValue;
+        }
+        public static bool IsMouseWheelDown()
+        {
+            return currentState.ScrollWheelValue < previousState.ScrollWheelValue;
         }
         #endregion
         #region PrivateMethods
