@@ -118,18 +118,19 @@ namespace GennadichGame
         {
             try
             {
+                GKeyboard.UpdateState();
+                GMouse.UpdateState();
+
                 if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || GKeyboard.GetState().IsKeyDown(Keys.Escape))
                     Exit();
 
-                if (GKeyboard.HasBeenPressed(Keys.F1)) SceneManager.ActiveState = GameState.MainMenu;
-                if (GKeyboard.HasBeenPressed(Keys.F2)) SceneManager.ActiveState = GameState.Game;
-                if (GKeyboard.HasBeenPressed(Keys.A))
+                if (GKeyboard.IsKeyPressed(Keys.F1)) SceneManager.ActiveState = GameState.MainMenu;
+                if (GKeyboard.IsKeyPressed(Keys.F2)) SceneManager.ActiveState = GameState.Game;
+                if (GKeyboard.IsKeyPressed(Keys.A))
                 {
                     if (GMouse.AlkashCursor) GMouse.AlkashCursor = false;
                     else GMouse.AlkashCursor = true;
                 }
-
-                GMouse.UpdateState();
 
                 SceneManager.ActiveScene.Update(gameTime);
 

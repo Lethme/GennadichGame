@@ -107,15 +107,15 @@ namespace GennadichGame.Scenes.Menu
 
             //if (!_itemSelected) _game.CurrentCursor = Cursor.Dart;
 
-            if (GKeyboard.HasBeenPressed(Keys.Up))
+            if (GKeyboard.IsKeyPressed(Keys.Up))
             {
                 SelectedItemIndex -= 1;
             }
-            if (GKeyboard.HasBeenPressed(Keys.Down))
+            if (GKeyboard.IsKeyPressed(Keys.Down))
             {
                 SelectedItemIndex += 1;
             }
-            if (SelectedItem.Type == ActionType.Update && (GKeyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
+            if (SelectedItem.Type == ActionType.Update && (GKeyboard.IsKeyPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
             {
                 Invoke();
             }
@@ -141,7 +141,7 @@ namespace GennadichGame.Scenes.Menu
 
             _game.SpriteBatch.End();
 
-            if (SelectedItem.Type == ActionType.Draw && (GKeyboard.HasBeenPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
+            if (SelectedItem.Type == ActionType.Draw && (GKeyboard.IsKeyPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
             {
                 Invoke();
             }
