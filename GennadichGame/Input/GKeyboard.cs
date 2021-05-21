@@ -18,8 +18,11 @@ namespace GennadichGame.Input
         public static event KeyboardEventHandler OnKeyReleased;
         #endregion
         #region Data
-        private static KeyboardState currentState;
+        private static KeyboardState currentState = Keyboard.GetState();
         private static KeyboardState previousState;
+        #endregion
+        #region Properties
+        public static bool InvokeEventsOnUpdate { get; set; } = true;
         #endregion
         #region PublicMethods
         public static KeyboardState GetState()
@@ -33,6 +36,10 @@ namespace GennadichGame.Input
             previousState = currentState;
             currentState = Keyboard.GetState();
 
+            if (InvokeEventsOnUpdate) InvokeEvents();
+        }
+        public static void InvokeEvents()
+        {
             if (OnKeyDown != null && GetDownKeys().Count() > 0) OnKeyDown.Invoke(currentState, GetDownKeys());
             if (OnKeyPressed != null && GetPressedKeys().Count() > 0) OnKeyPressed.Invoke(currentState, GetPressedKeys());
             if (OnKeyReleased != null && GetReleasedKeys().Count() > 0) OnKeyReleased.Invoke(currentState, GetReleasedKeys());
@@ -71,7 +78,7 @@ namespace GennadichGame.Input
             }
         }
         #endregion
-        #region PublicMethods
+        #region PrivateMethods
         #endregion
     }
 }

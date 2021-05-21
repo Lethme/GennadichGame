@@ -10,14 +10,8 @@ using GennadichGame.Input;
 
 namespace GennadichGame.Scenes.Menu
 {
-    public class MainMenu : Scene
+    public sealed class MainMenu : Scene
     {
-        #region Interface
-        private bool _active = false;
-        public bool Active => _active;
-        public event ActivateEventHandler OnActivate;
-        public event DeactivateEventHandler OnDeactivate;
-        #endregion
         #region Data
         private GennadichGame _game;
         private List<MainMenuItem> _items;
@@ -42,16 +36,21 @@ namespace GennadichGame.Scenes.Menu
         #region Constructors
         public MainMenu(GennadichGame game, params MainMenuItem[] items)
         {
-            _items = new List<MainMenuItem>();
             _game = game;
-
+            _items = new List<MainMenuItem>();
             AddItem(items);
 
+            Initialize();
+        }
+        #endregion
+        #region BaseClassMethods
+        protected override void Initialize()
+        {
             _center = new Vector2(_game.Window.ClientBounds.Width / 2, _game.Window.ClientBounds.Height / 2);
             _itemHeight = _game.SpriteFont.MeasureString(_items[0].Text).Y;
 
             _maxItemWidth = 0;
-            
+
             foreach (var item in _items)
             {
                 var width = _game.SpriteFont.MeasureString(item.Text).X;
@@ -77,19 +76,7 @@ namespace GennadichGame.Scenes.Menu
             _selectedItemRect = new Texture2D(_game.Graphics.GraphicsDevice, 1, 1);
             _selectedItemRect.SetData(new[] { Color.White });
         }
-        #endregion
-        #region InterfaceMethods
-        public void Activate()
-        {
-            _active = true;
-            if (OnActivate != null) OnActivate.Invoke();
-        }
-        public void Deactivate()
-        {
-            _active = false;
-            if (OnDeactivate != null) OnDeactivate.Invoke(this);
-        }
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             _mousePosition = Mouse.GetState().Position;
 
@@ -120,7 +107,7 @@ namespace GennadichGame.Scenes.Menu
                 Invoke();
             }
         }
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             var position = new Vector2(_center.X, _center.Y - _items.Count / 2 * _itemHeight);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
@@ -69,7 +70,8 @@ namespace GennadichGame
                 (Textures.ArrowCursor, Content.Load<Texture2D>("img/arrow")),
                 (Textures.PointerCursor, Content.Load<Texture2D>("img/pointer")),
                 (Textures.DartCursor, Content.Load<Texture2D>("img/dart")),
-                (Textures.Background1, Content.Load<Texture2D>("img/background-1"))
+                (Textures.Background1, Content.Load<Texture2D>("img/background-1")),
+                (Textures.Background2, Content.Load<Texture2D>("img/background-2"))
             );
 
             _spriteFont = Content.Load<SpriteFont>("font/consolas16");
@@ -84,7 +86,8 @@ namespace GennadichGame
             BackgroundManager.AddBackground
             (
                 (BackgroundImage.None, null),
-                (BackgroundImage.Clouds, TextureManager[Textures.Background1])
+                (BackgroundImage.Clouds, TextureManager[Textures.Background1]),
+                (BackgroundImage.Evening, TextureManager[Textures.Background2])
             );
 
             SceneManager.AddScene
@@ -121,7 +124,7 @@ namespace GennadichGame
                 GKeyboard.UpdateState();
                 GMouse.UpdateState();
 
-                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || GKeyboard.GetState().IsKeyDown(Keys.Escape))
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || GKeyboard.IsKeyDown(Keys.Escape))
                     Exit();
 
                 if (GKeyboard.IsKeyPressed(Keys.F1)) SceneManager.ActiveState = GameState.MainMenu;

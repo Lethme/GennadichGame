@@ -11,14 +11,8 @@ using GennadichGame.Enums;
 
 namespace GennadichGame.Scenes.Darts
 {
-    public class GDarts : Scene
+    public sealed class GDarts : Scene
     {
-        #region Interface
-        private bool _active = false;
-        public bool Active => _active;
-        public event ActivateEventHandler OnActivate;
-        public event DeactivateEventHandler OnDeactivate;
-        #endregion
         #region Data
         private GennadichGame _game;
         private Texture2D _dartsTex;
@@ -37,6 +31,12 @@ namespace GennadichGame.Scenes.Darts
             _game = game;
             _dartsTex = dartsTex;
 
+            Initialize();
+        }
+        #endregion
+        #region BaseClassMethods
+        protected override void Initialize()
+        {
             _dartsScale = 0.5f;
             _dartsPosition = new Vector2(
                 _game.Window.ClientBounds.Width / 2 - _dartsTex.Width * _dartsScale / 2 + _game.Window.ClientBounds.Width * 0.2f,
@@ -60,23 +60,11 @@ namespace GennadichGame.Scenes.Darts
                 _segments.Add((0.73, 0.78, angle, angle + segmentAngle));
             }
         }
-        #endregion
-        #region InterfaceMethods
-        public void Activate()
-        {
-            _active = true;
-            if (OnActivate != null) OnActivate.Invoke();
-        }
-        public void Deactivate()
-        {
-            _active = false;
-            if (OnDeactivate != null) OnDeactivate.Invoke(this);
-        }
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             
         }
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             _game.SpriteBatch.Begin();
             

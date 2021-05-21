@@ -17,7 +17,8 @@
     public enum BackgroundImage
     {
         None,
-        Clouds
+        Clouds,
+        Evening
     }
     public enum Textures
     {
@@ -25,7 +26,8 @@
         ArrowCursor,
         PointerCursor,
         DartCursor,
-        Background1
+        Background1,
+        Background2
     }
     public enum AngleNormalizationFactor
     {

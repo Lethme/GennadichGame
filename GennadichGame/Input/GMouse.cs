@@ -24,6 +24,7 @@ namespace GennadichGame.Input
         private static Random Rnd { get; } = new Random();
         #endregion
         #region Properties
+        public static bool InvokeEventsOnUpdate { get; set; } = true;
         public static bool AlkashCursor { get; set; } = false;
         public static Point Position => Mouse.GetState().Position;
         #endregion
@@ -62,8 +63,11 @@ namespace GennadichGame.Input
             previousState = currentState;
             currentState = Mouse.GetState();
 
+            if (InvokeEventsOnUpdate) InvokeEvents();
             if (AlkashCursor) Alkashize();
-
+        }
+        public static void InvokeEvents()
+        {
             if (OnLeftButtonDown != null && IsButtonDown(MouseButton.Left)) OnLeftButtonDown.Invoke(currentState);
             if (OnLeftButtonPressed != null && IsButtonPressed(MouseButton.Left)) OnLeftButtonPressed.Invoke(currentState);
             if (OnLeftButtonReleased != null && IsButtonReleased(MouseButton.Left)) OnLeftButtonReleased.Invoke(currentState);
