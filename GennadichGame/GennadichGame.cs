@@ -102,16 +102,16 @@ namespace GennadichGame
                     ("Connect to existing game", 0, () => { }),
                     ("Exit", 0, () => Exit())
                 )),
-                (GameState.Game, new GDarts(this, TextureManager[Textures.Darts]))
+                (GameState.Game, new GDarts(TextureManager[Textures.Darts]))
             );
 
-            SceneManager[GameState.MainMenu].OnActivate += () =>
+            SceneManager[GameState.MainMenu].OnActivate += (s) =>
             {
                 BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
                 CursorManager.ActiveCursor = Cursor.Dart;
             };
 
-            SceneManager[GameState.Game].OnActivate += () =>
+            SceneManager[GameState.Game].OnActivate += (s) =>
             {
                 BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
                 CursorManager.ActiveCursor = Cursor.Dart;

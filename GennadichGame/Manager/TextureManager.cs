@@ -22,7 +22,7 @@ namespace GennadichGame.Manager
         }
         public void AddTexture(params (Textures textureID, Texture2D texture)[] textures)
         {
-            foreach (var texture in textures) if (!Textures.ContainsKey(texture.Key)) Textures.Add(texture.textureID, texture.texture);
+            foreach (var texture in textures) if (!Textures.ContainsKey(texture.textureID)) Textures.Add(texture.textureID, texture.texture);
         }
         public Texture2D GetTexture(Textures texture) => Textures[texture];
         public bool Contains(Textures texture) => Textures.ContainsKey(texture);
