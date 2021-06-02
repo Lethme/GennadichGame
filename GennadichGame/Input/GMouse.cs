@@ -20,13 +20,14 @@ namespace GennadichGame.Input
         #region Data
         private static MouseState currentState = Mouse.GetState();
         private static MouseState previousState;
-        private static Direction currentDirection = Direction.Up;
+        private static Direction currentAlkashDirection = Direction.Up;
         private static Random Rnd { get; } = new Random();
         #endregion
         #region Properties
         public static bool InvokeEventsOnUpdate { get; set; } = true;
         public static bool AlkashCursor { get; set; } = false;
         public static Point Position => Mouse.GetState().Position;
+        public static Direction MoveDirection => GetMoveDirection();
         #endregion
         #region Events
         public static event MouseEventHandler OnLeftButtonDown;
@@ -267,8 +268,8 @@ namespace GennadichGame.Input
         #region PrivateMethods
         private static void Alkashize()
         {
-            currentDirection = (Direction)Rnd.Next(0, 8);
-            MoveCursor(currentDirection, 2);
+            currentAlkashDirection = (Direction)Rnd.Next(0, 8);
+            MoveCursor(currentAlkashDirection, 2);
         }
         private static bool CheckButtonState(Func<MouseButton, bool> func)
         {

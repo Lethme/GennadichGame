@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using GennadichGame.Input;
 using GennadichGame.Enums;
 using GennadichGame.Manager;
+using GennadichGame.Scenes;
 using GennadichGame.Scenes.Menu;
 using GennadichGame.Scenes.Darts;
 
@@ -58,6 +59,8 @@ namespace GennadichGame
 
             Window.Title = "GDarts";
 
+            Scene.Initialize(this);
+
             base.Initialize();
         }
         protected override void LoadContent()
@@ -92,7 +95,8 @@ namespace GennadichGame
 
             SceneManager.AddScene
             (
-                (GameState.MainMenu, new MainMenu(this,
+                (GameState.MainMenu, new MainMenu
+                (
                     ("Play offline", 0, () => { }),
                     ("Create game", 0, () => { }),
                     ("Connect to existing game", 0, () => { }),

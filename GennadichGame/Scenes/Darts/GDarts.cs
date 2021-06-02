@@ -14,7 +14,6 @@ namespace GennadichGame.Scenes.Darts
     public sealed class GDarts : Scene
     {
         #region Data
-        private GennadichGame _game;
         private Texture2D _dartsTex;
         private float _dartsScale;
         private Vector2 _dartsPosition;
@@ -26,11 +25,9 @@ namespace GennadichGame.Scenes.Darts
         public GDartsSegment IntersectedSegment => _segments.FirstOrDefault(segment => Intersects(segment));
         #endregion
         #region Constructors
-        public GDarts(GennadichGame game, Texture2D dartsTex)
+        public GDarts(Texture2D dartsTex)
         {
-            _game = game;
             _dartsTex = dartsTex;
-
             Initialize();
         }
         #endregion
@@ -39,8 +36,8 @@ namespace GennadichGame.Scenes.Darts
         {
             _dartsScale = 0.5f;
             _dartsPosition = new Vector2(
-                _game.Window.ClientBounds.Width / 2 - _dartsTex.Width * _dartsScale / 2 + _game.Window.ClientBounds.Width * 0.2f,
-                _game.Window.ClientBounds.Height / 2 - _dartsTex.Height * _dartsScale / 2
+                Game.Window.ClientBounds.Width / 2 - _dartsTex.Width * _dartsScale / 2 + Game.Window.ClientBounds.Width * 0.2f,
+                Game.Window.ClientBounds.Height / 2 - _dartsTex.Height * _dartsScale / 2
             );
 
             var segmentAngle = 360f / 20;
@@ -66,16 +63,16 @@ namespace GennadichGame.Scenes.Darts
         }
         public override void Draw(GameTime gameTime)
         {
-            _game.SpriteBatch.Begin();
+            Game.SpriteBatch.Begin();
             
-            _game.SpriteBatch.Draw(_dartsTex, new Rectangle(_dartsPosition.ToPoint(), DartsSize.ToPoint()), Color.White);
+            Game.SpriteBatch.Draw(_dartsTex, new Rectangle(_dartsPosition.ToPoint(), DartsSize.ToPoint()), Color.White);
 
             var mousePosition = GetMousePositionParams();
-            _game.SpriteBatch.DrawString(_game.SpriteFont, $"Distance: {(mousePosition.Distance > 1 ? 1 : mousePosition.Distance)}", new Vector2(50, 50), Color.Black);
-            _game.SpriteBatch.DrawString(_game.SpriteFont, $"Angle: {GDartsSegment.NormalizeAngle(mousePosition.Angle)}", new Vector2(50, 50 + _game.SpriteFont.MeasureString("TEST").Y), Color.Black);
-            _game.SpriteBatch.DrawString(_game.SpriteFont, $"Intersected segment: {IntersectedSegment}", new Vector2(50, 50 + _game.SpriteFont.MeasureString("TEST").Y * 2), Color.Black);
+            Game.SpriteBatch.DrawString(Game.SpriteFont, $"Distance: {(mousePosition.Distance > 1 ? 1 : mousePosition.Distance)}", new Vector2(50, 50), Color.Black);
+            Game.SpriteBatch.DrawString(Game.SpriteFont, $"Angle: {GDartsSegment.NormalizeAngle(mousePosition.Angle)}", new Vector2(50, 50 + Game.SpriteFont.MeasureString("TEST").Y), Color.Black);
+            Game.SpriteBatch.DrawString(Game.SpriteFont, $"Intersected segment: {IntersectedSegment}", new Vector2(50, 50 + Game.SpriteFont.MeasureString("TEST").Y * 2), Color.Black);
 
-            _game.SpriteBatch.End();
+            Game.SpriteBatch.End();
         }
         #endregion
         #region PrivateMethods

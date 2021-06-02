@@ -13,7 +13,6 @@ namespace GennadichGame.Scenes.Menu
     public sealed class MainMenu : Scene
     {
         #region Data
-        private GennadichGame _game;
         private List<MainMenuItem> _items;
         private Point _mousePosition;
         private Texture2D _selectedItemRect;
@@ -34,9 +33,8 @@ namespace GennadichGame.Scenes.Menu
         public int ItemsCount => _items.Count;
         #endregion
         #region Constructors
-        public MainMenu(GennadichGame game, params MainMenuItem[] items)
+        public MainMenu(params MainMenuItem[] items)
         {
-            _game = game;
             _items = new List<MainMenuItem>();
             AddItem(items);
 
@@ -46,14 +44,14 @@ namespace GennadichGame.Scenes.Menu
         #region BaseClassMethods
         protected override void Initialize()
         {
-            _center = new Vector2(_game.Window.ClientBounds.Width / 2, _game.Window.ClientBounds.Height / 2);
-            _itemHeight = _game.SpriteFont.MeasureString(_items[0].Text).Y;
+            _center = new Vector2(Game.Window.ClientBounds.Width / 2, Game.Window.ClientBounds.Height / 2);
+            _itemHeight = Game.SpriteFont.MeasureString(_items[0].Text).Y;
 
             _maxItemWidth = 0;
 
             foreach (var item in _items)
             {
-                var width = _game.SpriteFont.MeasureString(item.Text).X;
+                var width = Game.SpriteFont.MeasureString(item.Text).X;
                 item.Size = new Point((int)width, (int)_itemHeight);
                 if (width > _maxItemWidth) _maxItemWidth = width;
             }
@@ -73,7 +71,7 @@ namespace GennadichGame.Scenes.Menu
                 position.Y += _itemHeight;
             }
 
-            _selectedItemRect = new Texture2D(_game.Graphics.GraphicsDevice, 1, 1);
+            _selectedItemRect = new Texture2D(Game.Graphics.GraphicsDevice, 1, 1);
             _selectedItemRect.SetData(new[] { Color.White });
         }
         public override void Update(GameTime gameTime)
@@ -86,13 +84,13 @@ namespace GennadichGame.Scenes.Menu
             {
                 if (_items[i].Rect.Contains(_mousePosition))
                 {
-                    //_game.CurrentCursor = Cursor.Pointer;
+                    //Game.CurrentCursor = Cursor.Pointer;
                     SelectedItemIndex = i;
                     _itemSelected = true;
                 }
             }
 
-            //if (!_itemSelected) _game.CurrentCursor = Cursor.Dart;
+            //if (!_itemSelected) Game.CurrentCursor = Cursor.Dart;
 
             if (GKeyboard.IsKeyPressed(Keys.Up))
             {
@@ -111,22 +109,22 @@ namespace GennadichGame.Scenes.Menu
         {
             var position = new Vector2(_center.X, _center.Y - _items.Count / 2 * _itemHeight);
 
-            _game.SpriteBatch.Begin();
+            Game.SpriteBatch.Begin();
             //_spriteBatch.DrawString(_font, _items[0].Text, center - _font.MeasureString(_items[0].Text) / 2, Color.Red);
 
             if (SelectedItemIndex != -1)
             {
                 var item = _items[SelectedItemIndex];
-                _game.SpriteBatch.Draw(_selectedItemRect, item.Rect, _selectedItemRectColor);
+                Game.SpriteBatch.Draw(_selectedItemRect, item.Rect, _selectedItemRectColor);
             }
 
             foreach (var item in _items)
             {
-                _game.SpriteBatch.DrawString(_game.SpriteFont, item.Text, new Vector2(position.X - _game.SpriteFont.MeasureString(item.Text).X / 2, position.Y), Color.Black);
+                Game.SpriteBatch.DrawString(Game.SpriteFont, item.Text, new Vector2(position.X - Game.SpriteFont.MeasureString(item.Text).X / 2, position.Y), Color.Black);
                 position.Y += _itemHeight;
             }
 
-            _game.SpriteBatch.End();
+            Game.SpriteBatch.End();
 
             if (SelectedItem.Type == ActionType.Draw && (GKeyboard.IsKeyPressed(Keys.Enter) || (Mouse.GetState().LeftButton == ButtonState.Pressed && _itemSelected)))
             {
