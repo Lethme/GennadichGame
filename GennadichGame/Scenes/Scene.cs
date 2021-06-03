@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Text;
-using System.Collections.Generic;
 
 using Microsoft.Xna.Framework;
-
-using GennadichGame.Enums;
 
 namespace GennadichGame.Scenes
 {
@@ -26,7 +22,7 @@ namespace GennadichGame.Scenes
         public void Deactivate()
         {
             _active = false;
-            if (OnDeactivate != null) OnDeactivate.Invoke(this);
+            if (OnDeactivate != null) OnDeactivate.Invoke(this); 
         }
         protected abstract void Initialize();
         public abstract void Update(GameTime gameTime);

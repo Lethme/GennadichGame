@@ -68,9 +68,9 @@ namespace GennadichGame.Scenes.Darts
             Game.SpriteBatch.Draw(_dartsTex, new Rectangle(_dartsPosition.ToPoint(), DartsSize.ToPoint()), Color.White);
 
             var mousePosition = GetMousePositionParams();
-            Game.SpriteBatch.DrawString(Game.SpriteFont, $"Distance: {(mousePosition.Distance > 1 ? 1 : mousePosition.Distance)}", new Vector2(50, 50), Color.Black);
-            Game.SpriteBatch.DrawString(Game.SpriteFont, $"Angle: {GDartsSegment.NormalizeAngle(mousePosition.Angle)}", new Vector2(50, 50 + Game.SpriteFont.MeasureString("TEST").Y), Color.Black);
-            Game.SpriteBatch.DrawString(Game.SpriteFont, $"Intersected segment: {IntersectedSegment}", new Vector2(50, 50 + Game.SpriteFont.MeasureString("TEST").Y * 2), Color.Black);
+            Game.SpriteBatch.DrawString(Game.FontManager[Fonts.RegularConsolas16], $"Distance: {(mousePosition.Distance > 1 ? 1 : mousePosition.Distance)}", new Vector2(50, 50), Color.Black);
+            Game.SpriteBatch.DrawString(Game.FontManager[Fonts.RegularConsolas16], $"Angle: {GDartsSegment.NormalizeAngle(mousePosition.Angle)}", new Vector2(50, 50 + Game.FontManager[Fonts.RegularConsolas16].MeasureString("TEST").Y), Color.Black);
+            Game.SpriteBatch.DrawString(Game.FontManager[Fonts.RegularConsolas16], $"Intersected segment: {IntersectedSegment}", new Vector2(50, 50 + Game.FontManager[Fonts.RegularConsolas16].MeasureString("TEST").Y * 2), Color.Black);
 
             Game.SpriteBatch.End();
         }

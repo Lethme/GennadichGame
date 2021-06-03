@@ -14,7 +14,7 @@ namespace GennadichGame.Manager
         private Dictionary<Textures, Texture2D> Textures { get; } = new Dictionary<Textures, Texture2D>();
         public TextureManager() { }
         public TextureManager(params KeyValuePair<Textures, Texture2D>[] textures) => AddTexture(textures);
-        public TextureManager(GennadichGame game, params (Textures textureID, Texture2D texture)[] textures) => AddTexture(textures);
+        public TextureManager(params (Textures textureID, Texture2D texture)[] textures) => AddTexture(textures);
         public Texture2D this[Textures texture] => Textures[texture];
         public void AddTexture(params KeyValuePair<Textures, Texture2D>[] textures)
         {

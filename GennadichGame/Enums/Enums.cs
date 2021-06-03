@@ -22,12 +22,35 @@
     }
     public enum Textures
     {
+        Dart,
         Darts,
         ArrowCursor,
         PointerCursor,
         DartCursor,
         Background1,
         Background2
+    }
+    public enum Fonts
+    {
+        RegularConsolas8,
+        RegularConsolas10,
+        RegularConsolas12,
+        RegularConsolas14,
+        RegularConsolas16,
+        RegularConsolas18,
+        RegularConsolas20,
+        RegularConsolas22,
+        RegularConsolas24,
+        RegularConsolas26,
+        RegularConsolas28,
+        RegularConsolas30,
+        RegularConsolas32,
+        RegularConsolas40,
+        RegularConsolas48,
+        RegularConsolas56,
+        RegularConsolas64,
+        RegularConsolas72,
+        RegularConsolas80
     }
     public enum AngleNormalizationFactor
     {

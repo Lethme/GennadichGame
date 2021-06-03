@@ -24,6 +24,7 @@ namespace GennadichGame.Scenes.Menu
         private float _maxItemWidth;
         #endregion
         #region Properties
+        private SpriteFont ItemsFont => Game.FontManager[Fonts.RegularConsolas18];
         private MainMenuItem SelectedItem => _items[_selectedItemIndex];
         private int SelectedItemIndex 
         { 
@@ -45,13 +46,13 @@ namespace GennadichGame.Scenes.Menu
         protected override void Initialize()
         {
             _center = new Vector2(Game.Window.ClientBounds.Width / 2, Game.Window.ClientBounds.Height / 2);
-            _itemHeight = Game.SpriteFont.MeasureString(_items[0].Text).Y;
+            _itemHeight = ItemsFont.MeasureString(_items[0].Text).Y;
 
             _maxItemWidth = 0;
 
             foreach (var item in _items)
             {
-                var width = Game.SpriteFont.MeasureString(item.Text).X;
+                var width = ItemsFont.MeasureString(item.Text).X;
                 item.Size = new Point((int)width, (int)_itemHeight);
                 if (width > _maxItemWidth) _maxItemWidth = width;
             }
@@ -120,7 +121,7 @@ namespace GennadichGame.Scenes.Menu
 
             foreach (var item in _items)
             {
-                Game.SpriteBatch.DrawString(Game.SpriteFont, item.Text, new Vector2(position.X - Game.SpriteFont.MeasureString(item.Text).X / 2, position.Y), Color.Black);
+                Game.SpriteBatch.DrawString(ItemsFont, item.Text, new Vector2(position.X - ItemsFont.MeasureString(item.Text).X / 2, position.Y), Color.Black);
                 position.Y += _itemHeight;
             }
 
