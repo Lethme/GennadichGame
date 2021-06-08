@@ -52,6 +52,24 @@
         RegularConsolas72,
         RegularConsolas80
     }
+    public enum Position
+    {
+        Left,
+        Right,
+        Top,
+        Bottom,
+        TopLeft,
+        TopRight,
+        BottomLeft,
+        BottomRight,
+        Center
+    }
+    public enum Align
+    {
+        Left,
+        Right,
+        Center
+    }
     public enum AngleNormalizationFactor
     {
         PositiveOnly,

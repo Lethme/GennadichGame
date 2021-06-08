@@ -11,7 +11,8 @@ using GennadichGame.Input;
 using GennadichGame.Enums;
 using GennadichGame.Scenes;
 using GennadichGame.Manager;
-using GennadichGame.Scenes.Menu;
+using GennadichGame.Controls;
+using GennadichGame.Scenes.MainMenu;
 using GennadichGame.Scenes.Darts;
 using GennadichGame.Scenes.Lobby;
 
@@ -60,7 +61,7 @@ namespace GennadichGame
 
             Window.Title = "GDarts";
 
-            Scene.Initialize(this);
+            Control.Initialize(this);
 
             base.Initialize();
         }
@@ -120,6 +121,9 @@ namespace GennadichGame
             (
                 (GameState.MainMenu, new MainMenu
                 (
+                    Position.Center,
+                    Align.Center,
+                    Fonts.RegularConsolas16,
                     ("Play offline", 0, () => { }),
                     ("Create game", 0, () => { }),
                     ("Connect to existing game", 0, () => { }),
