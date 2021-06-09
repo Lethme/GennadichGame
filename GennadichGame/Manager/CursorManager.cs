@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
 
 using GennadichGame.Enums;
-using System.Collections;
+using GennadichGame.Controls;
 
 namespace GennadichGame.Manager
 {
-    public class CursorManager : IEnumerable<KeyValuePair<Cursor, Texture2D>>
+    public class CursorManager : GameModule, IEnumerable<KeyValuePair<Cursor, Texture2D>>
     {
         private Cursor _currentCursor;
         private Texture2D _currentCursorTex;
@@ -37,12 +38,20 @@ namespace GennadichGame.Manager
         }
         private bool SetActiveCursor(Texture2D cursorTexture)
         {
+            if (cursorTexture == null)
+            {
+                if (Game.IsMouseVisible) Game.IsMouseVisible = false;
+                return true;
+            }
+
             if (_currentCursorTex != cursorTexture)
             {
                 Mouse.SetCursor(MouseCursor.FromTexture2D(cursorTexture, 0, 0));
                 _currentCursorTex = cursorTexture;
                 return true;
             }
+
+            if (!Game.IsMouseVisible) Game.IsMouseVisible = true;
 
             return false;
         }

@@ -10,6 +10,7 @@
     }
     public enum Cursor
     {
+        None,
         Arrow,
         Pointer,
         Dart
@@ -22,6 +23,7 @@
     }
     public enum Textures
     {
+        Logo,
         Dart,
         Darts,
         ArrowCursor,

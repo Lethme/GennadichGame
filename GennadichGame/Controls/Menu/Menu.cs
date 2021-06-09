@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using GennadichGame.Input;
 using GennadichGame.Enums;
 
-namespace GennadichGame.Controls.Menu
+namespace GennadichGame.Controls
 {
     public class Menu : Control
     {
@@ -118,7 +118,7 @@ namespace GennadichGame.Controls.Menu
         {
             foreach (var item in items) _items.Add(item);
         }
-        public void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             _mousePosition = GMouse.GetState().Position;
 
@@ -146,7 +146,7 @@ namespace GennadichGame.Controls.Menu
                 Invoke();
             }
         }
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             var position = new Vector2(_items.First().Rect.X + _items.First().Rect.Width / 2, _items.First().Rect.Y + _items.First().Rect.Height / 6);
 

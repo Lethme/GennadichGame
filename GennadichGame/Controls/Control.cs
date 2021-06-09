@@ -1,17 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+
+using Microsoft.Xna.Framework;
+
+using GennadichGame.Enums;
 
 namespace GennadichGame.Controls
 {
-    public abstract class Control
+    public abstract class Control : GameModule
     {
-        private static GennadichGame _game;
-        public static GennadichGame Game => _game;
-        public static void Initialize(GennadichGame game)
-        {
-            if (game == null) throw new ArgumentNullException($"{nameof(game)} must not be null reference!");
-            _game = game;
-        }
+        protected static String DefaultText = String.Empty;
+        protected static Point DefaultLocation = Point.Zero;
+        protected static Fonts DefaultFont = Fonts.RegularConsolas14;
+        protected static Color DefaultFontColor = Color.Black;
+        protected static Position DefaultPosition = Position.TopLeft;
+        protected static Align DefaultTextAlign = Align.Left;
+        public abstract void Update(GameTime gameTime);
+        public abstract void Draw(GameTime gameTime);
     }
 }

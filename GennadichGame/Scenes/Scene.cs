@@ -8,7 +8,7 @@ namespace GennadichGame.Scenes
 {
     public delegate void ActivateEventHandler(Scene scene);
     public delegate void DeactivateEventHandler(Scene scene);
-    public abstract class Scene : Control
+    public abstract class Scene : GameModule
     {
         private bool _active = false;
         public bool Active => _active;

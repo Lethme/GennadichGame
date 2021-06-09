@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Input;
 
 using GennadichGame.Enums;
 using GennadichGame.Input;
-using GennadichGame.Controls.Menu;
+using GennadichGame.Controls;
 
 namespace GennadichGame.Scenes.MainMenu
 {

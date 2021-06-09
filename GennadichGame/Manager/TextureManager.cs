@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 using Microsoft.Xna.Framework.Graphics;
 
 using GennadichGame.Enums;
-using System.Collections;
+using GennadichGame.Controls;
 
 namespace GennadichGame.Manager
 {
-    public class TextureManager : IEnumerable<KeyValuePair<Textures, Texture2D>>
+    public class TextureManager : GameModule, IEnumerable<KeyValuePair<Textures, Texture2D>>
     {
         private Dictionary<Textures, Texture2D> Textures { get; } = new Dictionary<Textures, Texture2D>();
         public TextureManager() { }

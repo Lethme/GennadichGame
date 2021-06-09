@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 
 using GennadichGame.Enums;
 
-namespace GennadichGame.Controls.Menu
+namespace GennadichGame.Controls
 {
     public class MenuItem
     {

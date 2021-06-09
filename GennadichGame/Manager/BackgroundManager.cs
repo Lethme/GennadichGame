@@ -1,18 +1,17 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using GennadichGame.Enums;
-using System.Collections;
+using GennadichGame.Controls;
 
 namespace GennadichGame.Manager
 {
-    public class BackgroundManager : IEnumerable<KeyValuePair<BackgroundImage, Texture2D>>
+    public class BackgroundManager : GameModule, IEnumerable<KeyValuePair<BackgroundImage, Texture2D>>
     {
-        private GennadichGame _game;
         private BackgroundImage _currentBackground;
         private Texture2D _currentBackgroundTex;
         public BackgroundImage ActiveBackground
@@ -21,18 +20,13 @@ namespace GennadichGame.Manager
             set { SetActiveBackground(value); }
         }
         private Dictionary<BackgroundImage, Texture2D> Backgrounds { get; } = new Dictionary<BackgroundImage, Texture2D>();
-        public BackgroundManager(GennadichGame game) 
+        public BackgroundManager() { }
+        public BackgroundManager(params KeyValuePair<BackgroundImage, Texture2D>[] backgrounds)
         {
-            _game = game;
-        }
-        public BackgroundManager(GennadichGame game, params KeyValuePair<BackgroundImage, Texture2D>[] backgrounds)
-        {
-            _game = game;
             AddBackground(backgrounds);
         }
-        public BackgroundManager(GennadichGame game, params (BackgroundImage image, Texture2D backgroundTexture)[] backgrounds)
-        {
-            _game = game;
+        public BackgroundManager(params (BackgroundImage image, Texture2D backgroundTexture)[] backgrounds)
+        {            
             AddBackground(backgrounds);
         }
         public void AddBackground(params KeyValuePair<BackgroundImage, Texture2D>[] backgrounds)
@@ -47,9 +41,9 @@ namespace GennadichGame.Manager
         {
             if (_currentBackgroundTex != null)
             {
-                _game.SpriteBatch.Begin();
-                _game.SpriteBatch.Draw(_currentBackgroundTex, new Rectangle(0, 0, _game.Window.ClientBounds.Width, _game.Window.ClientBounds.Height), Color.White);
-                _game.SpriteBatch.End();
+                Game.SpriteBatch.Begin();
+                Game.SpriteBatch.Draw(_currentBackgroundTex, new Rectangle(0, 0, Game.Window.ClientBounds.Width, Game.Window.ClientBounds.Height), Color.White);
+                Game.SpriteBatch.End();
             }
         }
         public void SetActiveBackground(BackgroundImage image)

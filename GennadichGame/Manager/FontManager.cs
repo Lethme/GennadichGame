@@ -5,10 +5,11 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 
 using GennadichGame.Enums;
+using GennadichGame.Controls;
 
 namespace GennadichGame.Manager
 {
-    public class FontManager : IEnumerable<KeyValuePair<Fonts, SpriteFont>>
+    public class FontManager : GameModule, IEnumerable<KeyValuePair<Fonts, SpriteFont>>
     {
         private Dictionary<Fonts, SpriteFont> Fonts { get; } = new Dictionary<Fonts, SpriteFont>();
         public FontManager() { }

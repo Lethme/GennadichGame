@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
+using System.Collections;
 using System.Collections.Generic;
 
 using GennadichGame.Enums;
 using GennadichGame.Scenes;
-using System.Collections;
+using GennadichGame.Controls;
 
 namespace GennadichGame.Manager
 {
     public delegate void SceneChangedEventHandler(GameState previousState);
-    public class SceneManager : IEnumerable<KeyValuePair<GameState, Scene>>
+    public class SceneManager : GameModule, IEnumerable<KeyValuePair<GameState, Scene>>
     {
         public event SceneChangedEventHandler OnSceneChanged;
         private Dictionary<GameState, Scene> Scenes { get; } = new Dictionary<GameState, Scene>();
@@ -34,7 +35,7 @@ namespace GennadichGame.Manager
         }
         public void SetActiveScene(GameState scene)
         {
-            if (ActiveState == scene) return;
+            if (ActiveState == scene && Scenes.Select(sc => sc.Value).FirstOrDefault(sc => sc.Active) != null) return;
 
             var currentState = ActiveState;
             var currentScene = ActiveScene;

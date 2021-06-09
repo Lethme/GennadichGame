@@ -12,9 +12,11 @@ using GennadichGame.Enums;
 using GennadichGame.Scenes;
 using GennadichGame.Manager;
 using GennadichGame.Controls;
-using GennadichGame.Scenes.MainMenu;
+
 using GennadichGame.Scenes.Darts;
 using GennadichGame.Scenes.Lobby;
+using GennadichGame.Scenes.MainMenu;
+using GennadichGame.Scenes.StartScreen;
 
 namespace GennadichGame
 {
@@ -30,11 +32,14 @@ namespace GennadichGame
         public FontManager FontManager { get; }
         public BackgroundManager BackgroundManager { get; }
         public CursorManager CursorManager { get; }
+        public LinkedList<Control> Controls { get; }
         private SceneManager SceneManager { get; }
         #endregion
         #region Properties
         public GraphicsDeviceManager Graphics => _graphics;
         public SpriteBatch SpriteBatch => _spriteBatch;
+        public Point Center => new Point(Window.ClientBounds.Width / 2, Window.ClientBounds.Height / 2);
+        public Point Size => new Point(Window.ClientBounds.Width, Window.ClientBounds.Height);
         #endregion
         #region Constructors
         public GennadichGame(int width, int height)
@@ -45,11 +50,12 @@ namespace GennadichGame
 
             _windowSize = new Point(width, height);
 
-            BackgroundManager = new BackgroundManager(this);
+            BackgroundManager = new BackgroundManager();
             FontManager = new FontManager();
             TextureManager = new TextureManager();
             CursorManager = new CursorManager();
             SceneManager = new SceneManager();
+            Controls = new LinkedList<Control>();
         }
         #endregion
         #region ProtectedMethods
@@ -61,7 +67,7 @@ namespace GennadichGame
 
             Window.Title = "GDarts";
 
-            Control.Initialize(this);
+            GameModule.Initialize(this);
 
             base.Initialize();
         }
@@ -71,6 +77,7 @@ namespace GennadichGame
 
             TextureManager.AddTexture
             (
+                (Textures.Logo, Content.Load<Texture2D>("img/logo")),
                 (Textures.Dart, Content.Load<Texture2D>("img/flying_dart")),
                 (Textures.Darts, Content.Load<Texture2D>("img/board")),
                 (Textures.ArrowCursor, Content.Load<Texture2D>("img/arrow")),
@@ -105,6 +112,7 @@ namespace GennadichGame
 
             CursorManager.AddCursor
             (
+                (Cursor.None, null),
                 (Cursor.Arrow, TextureManager[Textures.ArrowCursor]),
                 (Cursor.Pointer, TextureManager[Textures.PointerCursor]),
                 (Cursor.Dart, TextureManager[Textures.DartCursor])
@@ -119,6 +127,7 @@ namespace GennadichGame
 
             SceneManager.AddScene
             (
+                (GameState.StartScreen, new StartScreen()),
                 (GameState.MainMenu, new MainMenu
                 (
                     Position.Center,
@@ -132,6 +141,12 @@ namespace GennadichGame
                 (GameState.Game, new GDarts(TextureManager[Textures.Darts])),
                 (GameState.GameLobby, new GameLobby())
             );
+
+            SceneManager[GameState.StartScreen].OnActivate += (s) =>
+            {
+                BackgroundManager.ActiveBackground = BackgroundImage.None;
+                CursorManager.ActiveCursor = Cursor.None;
+            };
 
             SceneManager[GameState.MainMenu].OnActivate += (s) =>
             {
@@ -153,7 +168,16 @@ namespace GennadichGame
 
             CursorManager.ActiveCursor = Cursor.Dart;
             BackgroundManager.ActiveBackground = BackgroundImage.None;
-            SceneManager.ActiveState = GameState.MainMenu;
+            SceneManager.ActiveState = GameState.StartScreen;
+
+            Controls.AddLast(new MultiLabel
+            (
+                position: Position.Center,
+                textAlign: Align.Center,
+                font: Fonts.RegularConsolas48,
+                fontColor: Color.Red,
+                "Test", "Dimasik Bidlo", "Another"
+            ));
         }
         protected override void Update(GameTime gameTime)
         {
@@ -165,9 +189,10 @@ namespace GennadichGame
                 if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || GKeyboard.IsKeyDown(Keys.Escape))
                     Exit();
 
-                if (GKeyboard.IsKeyPressed(Keys.F1)) SceneManager.ActiveState = GameState.MainMenu;
-                if (GKeyboard.IsKeyPressed(Keys.F2)) SceneManager.ActiveState = GameState.GameLobby;
-                if (GKeyboard.IsKeyPressed(Keys.F3)) SceneManager.ActiveState = GameState.Game;
+                if (GKeyboard.IsKeyPressed(Keys.F1)) SceneManager.ActiveState = GameState.StartScreen;
+                if (GKeyboard.IsKeyPressed(Keys.F2)) SceneManager.ActiveState = GameState.MainMenu;
+                if (GKeyboard.IsKeyPressed(Keys.F3)) SceneManager.ActiveState = GameState.GameLobby;
+                if (GKeyboard.IsKeyPressed(Keys.F4)) SceneManager.ActiveState = GameState.Game;
                 if (GKeyboard.IsKeyPressed(Keys.A))
                 {
                     if (GMouse.AlkashCursor) GMouse.AlkashCursor = false;
@@ -175,6 +200,8 @@ namespace GennadichGame
                 }
 
                 SceneManager.ActiveScene.Update(gameTime);
+
+                foreach (var ctrl in Controls) { ctrl.Update(gameTime); }
 
                 base.Update(gameTime);
             }
@@ -188,8 +215,13 @@ namespace GennadichGame
             try
             {
                 GraphicsDevice.Clear(Color.White);
+
                 BackgroundManager.DrawBackground();
+
                 SceneManager.ActiveScene.Draw(gameTime);
+
+                foreach (var ctrl in Controls) { ctrl.Draw(gameTime); }
+
                 base.Draw(gameTime);
             }
             catch (Exception ex)
