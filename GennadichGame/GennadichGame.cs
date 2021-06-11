@@ -170,14 +170,14 @@ namespace GennadichGame
             BackgroundManager.ActiveBackground = BackgroundImage.None;
             SceneManager.ActiveState = GameState.StartScreen;
 
-            Controls.AddLast(new MultiLabel
-            (
-                position: Position.Center,
-                textAlign: Align.Center,
-                font: Fonts.RegularConsolas48,
-                fontColor: Color.Red,
-                "Test", "Dimasik Bidlo", "Another"
-            ));
+            //Controls.AddLast(new MultiLabel
+            //(
+            //    position: Position.Center,
+            //    textAlign: Align.Center,
+            //    font: Fonts.RegularConsolas48,
+            //    fontColor: Color.Red,
+            //    "Test", "Dimasik Bidlo", "Another"
+            //));
         }
         protected override void Update(GameTime gameTime)
         {

@@ -11,13 +11,16 @@ namespace GennadichGame.Controls
 {
     public class MultiLabel : Control
     {
+        private Position _position = DefaultPosition;
+        private Align _textAlign = DefaultTextAlign;
+        private Point _location = DefaultLocation;
         private List<Label> Labels { get; } = new List<Label>();
         private List<String> Texts { get; } = new List<String>();
-        public Point Location { get; set; } = DefaultLocation;
+        public Point Location { get { return _location; } set { _location = value; _position = Position.None; CalcLocations(_textAlign); } }
         public Fonts Font { get; set; } = DefaultFont;
         public Color FontColor { get; set; } = DefaultFontColor;
-        public Align TextAlign { set { CalcLocations(value); } }
-        public Position Position { set { SetPosition(value); } }
+        public Align TextAlign { set { _textAlign = value; CalcLocations(value); } }
+        public Position Position { set { _position = value; SetPosition(value); } }
         public int MaxLabelWidth => Labels.Select(label => label.TextSize.X).Max();
         public int MinLabelWidth => Labels.Select(label => label.TextSize.X).Min();
         public int MaxLabelHeight => Labels.Select(label => label.TextSize.Y).Max();
@@ -31,25 +34,29 @@ namespace GennadichGame.Controls
         {
             if (font != null) Font = font.Value;
             if (fontColor != null) FontColor = fontColor.Value;
-            AddLabel(captions);
             if (position != null) Position = position.Value;
             if (textAlign != null) TextAlign = textAlign.Value;
+            AddLabel(captions);
         }
         public MultiLabel(Point? location = null, Align? textAlign = null, Fonts? font = null, Color? fontColor = null, params String[] captions)
         {
             if (font != null) Font = font.Value;
             if (fontColor != null) FontColor = fontColor.Value;
-            AddLabel(captions);
             if (location != null) Location = location.Value;
             if (textAlign != null) TextAlign = textAlign.Value;
+            AddLabel(captions);
         }
         public void AddLabel(params String[] captions)
         {
             foreach (var cap in captions) Labels.Add(new Label(cap, Location, Font, FontColor));
             foreach (var text in Labels.Select(label => label.Text)) Texts.Add(text);
+            SetPosition(_position);
+            CalcLocations(_textAlign);
         }
         private void CalcLocations(Align align)
         {
+            if (Labels.Count == 0) return;
+
             var pos = Location;
             foreach (var label in Labels)
             {
@@ -66,7 +73,8 @@ namespace GennadichGame.Controls
         }
         public void SetPosition(Position position)
         {
-            var label = Labels.First();
+            if (Labels.Count == 0) return;
+
             switch (position)
             {
                 case Position.Top: { Location = new Point(Game.Center.X - MaxLabelWidth / 2, 0); break; }
@@ -82,7 +90,8 @@ namespace GennadichGame.Controls
         }
         public override void Update(GameTime gameTime)
         {
-            
+            SetPosition(_position);
+            CalcLocations(_textAlign);
         }
         public override void Draw(GameTime gameTime)
         {

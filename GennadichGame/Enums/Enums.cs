@@ -56,6 +56,7 @@
     }
     public enum Position
     {
+        None,
         Left,
         Right,
         Top,
