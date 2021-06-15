@@ -2,46 +2,58 @@
 using System.Linq;
 using System.Threading;
 using System.Collections.Generic;
-
+using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
 using GennadichGame.Input;
 using GennadichGame.Enums;
 using GennadichGame.Scenes;
 using GennadichGame.Manager;
 using GennadichGame.Controls;
-
 using GennadichGame.Scenes.Darts;
 using GennadichGame.Scenes.Lobby;
 using GennadichGame.Scenes.MainMenu;
 using GennadichGame.Scenes.StartScreen;
+using GennadichGame.Sockets.Common;
+using GennadichGame.Sockets.TCP;
+using GennadichGame.Sockets.UDP;
 
 namespace GennadichGame
 {
     public class GennadichGame : Game
     {
         #region Data
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Point _windowSize;
+
         #endregion
+
         #region Managers
+
         public TextureManager TextureManager { get; }
         public FontManager FontManager { get; }
         public BackgroundManager BackgroundManager { get; }
         public CursorManager CursorManager { get; }
         public LinkedList<Control> Controls { get; }
-        private SceneManager SceneManager { get; }
+        internal SceneManager SceneManager { get; }
+
         #endregion
+
         #region Properties
+
         public GraphicsDeviceManager Graphics => _graphics;
         public SpriteBatch SpriteBatch => _spriteBatch;
         public Point Center => new Point(Window.ClientBounds.Width / 2, Window.ClientBounds.Height / 2);
         public Point Size => new Point(Window.ClientBounds.Width, Window.ClientBounds.Height);
+
         #endregion
+
         #region Constructors
+
         public GennadichGame(int width, int height)
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -57,8 +69,11 @@ namespace GennadichGame
             SceneManager = new SceneManager();
             Controls = new LinkedList<Control>();
         }
+
         #endregion
+
         #region ProtectedMethods
+
         protected override void Initialize()
         {
             _graphics.PreferredBackBufferWidth = _windowSize.X;
@@ -71,6 +86,7 @@ namespace GennadichGame
 
             base.Initialize();
         }
+
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
@@ -134,12 +150,13 @@ namespace GennadichGame
                     Align.Center,
                     Fonts.RegularConsolas16,
                     ("Play offline", 0, () => { }),
-                    ("Create game", 0, () => { }),
-                    ("Connect to existing game", 0, () => { }),
+                    ("Create game", 0, () => { SceneManager.ActiveState = GameState.GameCreateLobby; }),
+                    ("Connect to existing game", 0, () => { SceneManager.ActiveState = GameState.GameFindLobby; }),
                     ("Exit", 0, () => Exit())
                 )),
                 (GameState.Game, new GDarts(TextureManager[Textures.Darts])),
-                (GameState.GameLobby, new GameLobby())
+                (GameState.GameCreateLobby, new GameLobby(true, Dns.GetHostName())),
+                (GameState.GameFindLobby, new GameLobby(false, Dns.GetHostName()))
             );
 
             SceneManager[GameState.StartScreen].OnActivate += (s) =>
@@ -158,12 +175,20 @@ namespace GennadichGame
             {
                 BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
                 CursorManager.ActiveCursor = Cursor.Dart;
+                ((GDarts) s).StartGame();
             };
 
-            SceneManager[GameState.GameLobby].OnActivate += (s) =>
+            SceneManager[GameState.GameFindLobby].OnActivate += (s) =>
             {
                 BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
                 CursorManager.ActiveCursor = Cursor.Dart;
+                s.Initialize();
+            };
+            SceneManager[GameState.GameCreateLobby].OnActivate += (s) =>
+            {
+                BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
+                CursorManager.ActiveCursor = Cursor.Dart;
+                s.Initialize();
             };
 
             CursorManager.ActiveCursor = Cursor.Dart;
@@ -179,6 +204,7 @@ namespace GennadichGame
             //    "Test", "Dimasik Bidlo", "Another"
             //));
         }
+
         protected override void Update(GameTime gameTime)
         {
             try
@@ -186,12 +212,13 @@ namespace GennadichGame
                 GKeyboard.UpdateState();
                 GMouse.UpdateState();
 
-                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || GKeyboard.IsKeyDown(Keys.Escape))
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                    GKeyboard.IsKeyDown(Keys.Escape))
                     Exit();
 
                 if (GKeyboard.IsKeyPressed(Keys.F1)) SceneManager.ActiveState = GameState.StartScreen;
                 if (GKeyboard.IsKeyPressed(Keys.F2)) SceneManager.ActiveState = GameState.MainMenu;
-                if (GKeyboard.IsKeyPressed(Keys.F3)) SceneManager.ActiveState = GameState.GameLobby;
+                if (GKeyboard.IsKeyPressed(Keys.F3)) SceneManager.ActiveState = GameState.GameFindLobby;
                 if (GKeyboard.IsKeyPressed(Keys.F4)) SceneManager.ActiveState = GameState.Game;
                 if (GKeyboard.IsKeyPressed(Keys.A))
                 {
@@ -201,7 +228,10 @@ namespace GennadichGame
 
                 SceneManager.ActiveScene.Update(gameTime);
 
-                foreach (var ctrl in Controls) { ctrl.Update(gameTime); }
+                foreach (var ctrl in Controls)
+                {
+                    ctrl.Update(gameTime);
+                }
 
                 base.Update(gameTime);
             }
@@ -210,6 +240,7 @@ namespace GennadichGame
                 Console.WriteLine($"Update method exception:\n{ex.Message}");
             }
         }
+
         protected override void Draw(GameTime gameTime)
         {
             try
@@ -220,7 +251,10 @@ namespace GennadichGame
 
                 SceneManager.ActiveScene.Draw(gameTime);
 
-                foreach (var ctrl in Controls) { ctrl.Draw(gameTime); }
+                foreach (var ctrl in Controls)
+                {
+                    ctrl.Draw(gameTime);
+                }
 
                 base.Draw(gameTime);
             }
@@ -229,6 +263,7 @@ namespace GennadichGame
                 Console.WriteLine($"Draw method exception:\n{ex.Message}");
             }
         }
+
         #endregion
     }
 }

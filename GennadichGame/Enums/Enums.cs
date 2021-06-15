@@ -4,7 +4,8 @@
     {
         StartScreen,
         MainMenu,
-        GameLobby,
+        GameFindLobby,
+        GameCreateLobby,
         Game,
         Score
     }

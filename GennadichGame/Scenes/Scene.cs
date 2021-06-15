@@ -24,7 +24,8 @@ namespace GennadichGame.Scenes
             _active = false;
             if (OnDeactivate != null) OnDeactivate.Invoke(this); 
         }
-        protected virtual void Initialize() { }
+
+        public virtual void Initialize() { }
         public abstract void Update(GameTime gameTime);
         public abstract void Draw(GameTime gameTime);
     }
