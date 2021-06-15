@@ -16,6 +16,7 @@ namespace GennadichGame.Controls
         private Point _location = DefaultLocation;
         private List<Label> Labels { get; } = new List<Label>();
         private List<String> Texts { get; } = new List<String>();
+        public int Count => Labels.Count;
         public Point Location { get { return _location; } set { _location = value; _position = Position.None; CalcLocations(_textAlign); } }
         public Fonts Font { get; set; } = DefaultFont;
         public Color FontColor { get; set; } = DefaultFontColor;
@@ -53,6 +54,7 @@ namespace GennadichGame.Controls
             SetPosition(_position);
             CalcLocations(_textAlign);
         }
+        public void Clear() => Labels.Clear();
         private void CalcLocations(Align align)
         {
             if (Labels.Count == 0) return;

@@ -31,18 +31,14 @@ namespace GennadichGame
         private Point _windowSize;
 
         #endregion
-
         #region Managers
-
         public TextureManager TextureManager { get; }
         public FontManager FontManager { get; }
         public BackgroundManager BackgroundManager { get; }
         public CursorManager CursorManager { get; }
         public LinkedList<Control> Controls { get; }
         internal SceneManager SceneManager { get; }
-
         #endregion
-
         #region Properties
 
         public GraphicsDeviceManager Graphics => _graphics;
@@ -51,7 +47,6 @@ namespace GennadichGame
         public Point Size => new Point(Window.ClientBounds.Width, Window.ClientBounds.Height);
 
         #endregion
-
         #region Constructors
 
         public GennadichGame(int width, int height)
@@ -71,7 +66,6 @@ namespace GennadichGame
         }
 
         #endregion
-
         #region ProtectedMethods
 
         protected override void Initialize()
@@ -194,15 +188,6 @@ namespace GennadichGame
             CursorManager.ActiveCursor = Cursor.Dart;
             BackgroundManager.ActiveBackground = BackgroundImage.None;
             SceneManager.ActiveState = GameState.StartScreen;
-
-            //Controls.AddLast(new MultiLabel
-            //(
-            //    position: Position.Center,
-            //    textAlign: Align.Center,
-            //    font: Fonts.RegularConsolas48,
-            //    fontColor: Color.Red,
-            //    "Test", "Dimasik Bidlo", "Another"
-            //));
         }
 
         protected override void Update(GameTime gameTime)

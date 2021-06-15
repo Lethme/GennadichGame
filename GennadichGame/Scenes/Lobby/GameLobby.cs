@@ -13,12 +13,15 @@ using GennadichGame.Sockets.TCP;
 using GennadichGame.Sockets.UDP;
 using Microsoft.Xna.Framework.Input;
 
+using GennadichGame.Controls;
+
 namespace GennadichGame.Scenes.Lobby
 {
     public sealed class GameLobby : Scene
     {
         private Lobby Lobby { get; set; } = new Lobby();
         private bool IsHosted { get; set; }
+        private Menu LobbyMenu { get; }
         private TcpAsyncClient _client { get; set; }
         private string ClientName { get; set; }
         private String PlayersCount => $"{Lobby.PlayersCount}/{Lobby.MaxSize}";
@@ -30,6 +33,29 @@ namespace GennadichGame.Scenes.Lobby
         {
             IsHosted = isHosted;
             ClientName = clientName;
+
+            if (IsHosted) LobbyMenu = new Menu
+            (
+                Position.Bottom, Align.Center, Fonts.RegularConsolas16,
+                ("Start Game", ActionType.Update, () =>
+                {
+                    ((GDarts)Game.SceneManager[GameState.Game]).Client = _client;
+                    ((GDarts)Game.SceneManager[GameState.Game]).ClientName = ClientName;
+                    Game.SceneManager.ActiveState = GameState.Game;
+                }
+                ),
+                ("Exit Lobby", ActionType.Update, ExitLobby)
+            );
+            else
+            {
+                LobbyMenu = new Menu(Position.Bottom, Align.Center, Fonts.RegularConsolas16, ("Exit Lobby", ActionType.Update, ExitLobby));
+            }
+        }
+        private void ExitLobby()
+        {
+            if (IsHosted) TcpAsyncServer.StopInterfacesListening();
+            _client = null;
+            Game.SceneManager.ActiveState = GameState.MainMenu;
         }
 
         public override void Initialize()
@@ -60,13 +86,14 @@ namespace GennadichGame.Scenes.Lobby
 
         public override void Update(GameTime gameTime)
         {
-            if (GKeyboard.IsKeyPressed(Keys.Enter))
-            {
-                ((GDarts) Game.SceneManager[GameState.Game]).Client = _client;
-                ((GDarts) Game.SceneManager[GameState.Game]).ClientName = ClientName;
-                Game.SceneManager.ActiveState = GameState.Game;
-            }
+            //if (GKeyboard.IsKeyPressed(Keys.Enter))
+            //{
+            //    ((GDarts) Game.SceneManager[GameState.Game]).Client = _client;
+            //    ((GDarts) Game.SceneManager[GameState.Game]).ClientName = ClientName;
+            //    Game.SceneManager.ActiveState = GameState.Game;
+            //}
 
+            LobbyMenu.Update(gameTime);
         }
 
         public override void Draw(GameTime gameTime)
@@ -89,6 +116,8 @@ namespace GennadichGame.Scenes.Lobby
             }
 
             Game.SpriteBatch.End();
+
+            LobbyMenu.Draw(gameTime);
         }
 
         public void AddPlayerInLobby(List<string> players)

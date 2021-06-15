@@ -9,8 +9,6 @@ namespace GennadichGame
         {
             using (var game = new GennadichGame(1200, 700))
                 game.Run();
-
-            Console.ReadKey();
         }
     }
 }
