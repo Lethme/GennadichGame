@@ -23,12 +23,14 @@ namespace GennadichGame.Scenes.Lobby
         private bool IsHosted { get; set; }
         private Menu LobbyMenu { get; }
         private TcpAsyncClient _client { get; set; }
+        private UdpServer _udpServer { get; set; } = null;
         private string ClientName { get; set; }
         private String PlayersCount => $"{Lobby.PlayersCount}/{Lobby.MaxSize}";
         private SpriteFont LobbyNameFont => Game.FontManager[Fonts.RegularConsolas16];
         private SpriteFont PlayersCountFont => Game.FontManager[Fonts.RegularConsolas18];
         private SpriteFont PlayersNamesFont => Game.FontManager[Fonts.RegularConsolas16];
 
+        
         public GameLobby(bool isHosted, string clientName)
         {
             IsHosted = isHosted;
@@ -41,6 +43,9 @@ namespace GennadichGame.Scenes.Lobby
                 {
                     ((GDarts)Game.SceneManager[GameState.Game]).Client = _client;
                     ((GDarts)Game.SceneManager[GameState.Game]).ClientName = ClientName;
+                    ((GDarts)Game.SceneManager[GameState.Game]).StartGame(true);
+                    TcpAsyncServer.StopInterfaceListening();
+                    _udpServer.StopListen();
                     Game.SceneManager.ActiveState = GameState.Game;
                 }
                 ),
@@ -53,8 +58,12 @@ namespace GennadichGame.Scenes.Lobby
         }
         private void ExitLobby()
         {
-            if (IsHosted) TcpAsyncServer.StopInterfacesListening();
-            _client = null;
+            if (IsHosted)
+            {
+                TcpAsyncServer.StopInterfaceListening();
+                _udpServer.StopListen();
+                TcpAsyncServer.SafeCloseAllSockets();
+            }
             Game.SceneManager.ActiveState = GameState.MainMenu;
         }
 
@@ -62,8 +71,8 @@ namespace GennadichGame.Scenes.Lobby
         {
             if (IsHosted)
             {
-                var udpServer = new UdpServer(12345, 11000, "GDarts");
-                udpServer.StartListen();
+                _udpServer = new UdpServer(12345, 11000, "GDarts");
+                _udpServer.StartListen();
                 TcpAsyncServer.StartTcpServer();
             }
 
@@ -74,6 +83,7 @@ namespace GennadichGame.Scenes.Lobby
                     udpClient.TcpPort);
                 _client = new TcpAsyncClient(connection);
                 _client.handleConnection += AddPlayerInLobby;
+                _client.handleGame += JoinGame;
                 _client.SendFindLobbyMessage();
             }
             else
@@ -86,13 +96,6 @@ namespace GennadichGame.Scenes.Lobby
 
         public override void Update(GameTime gameTime)
         {
-            //if (GKeyboard.IsKeyPressed(Keys.Enter))
-            //{
-            //    ((GDarts) Game.SceneManager[GameState.Game]).Client = _client;
-            //    ((GDarts) Game.SceneManager[GameState.Game]).ClientName = ClientName;
-            //    Game.SceneManager.ActiveState = GameState.Game;
-            //}
-
             LobbyMenu.Update(gameTime);
         }
 
@@ -130,6 +133,15 @@ namespace GennadichGame.Scenes.Lobby
                     Lobby.Players.Add(new Player(player));
                 }
             }
+        }
+
+        public void JoinGame()
+        {
+            ((GDarts)Game.SceneManager[GameState.Game]).Client = _client;
+            ((GDarts)Game.SceneManager[GameState.Game]).ClientName = ClientName;
+            ((GDarts)Game.SceneManager[GameState.Game]).StartGame(false);
+
+            Game.SceneManager.ActiveState = GameState.Game;
         }
     }
 }

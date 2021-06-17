@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,27 +23,34 @@ namespace GennadichGame.Sockets.UDP
             _udpServer = new System.Net.Sockets.UdpClient(_listenPort);
             _tcpPort = tcpPort;
             _broadcastMessage = message;
-            _mainLoop = new Thread(()=>
-            {
-                try
-                {
-                    UdpListen();
-                }
-                catch (ThreadAbortException)
-                {
-                    Thread.ResetAbort();
-                }
-            });
+            _mainLoop = new Thread(UdpListen);
         }
 
         private void UdpListen()
         {
             while (true)
             {
-                var bytes = _udpServer.Receive(ref _groupAddresses);
-                if (!Equals(Encoding.UTF8.GetString(bytes), _broadcastMessage)) continue;
-                var sendBuff = Encoding.UTF8.GetBytes(_tcpPort.ToString());
-                _udpServer.Send(sendBuff, sendBuff.Length, _groupAddresses.Address.ToString(), _groupAddresses.Port);
+                try
+                {
+                    var bytes = _udpServer.Receive(ref _groupAddresses);
+                    if (!Equals(Encoding.UTF8.GetString(bytes), _broadcastMessage)) continue;
+                    var sendBuff = Encoding.UTF8.GetBytes(_tcpPort.ToString());
+                    _udpServer.Send(sendBuff, sendBuff.Length, _groupAddresses.Address.ToString(),
+                        _groupAddresses.Port);
+
+                }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
+                catch (SocketException)
+                {
+                    return;
+                }
+                catch (InvalidOperationException)
+                {
+                    return;
+                }
             }
         }
         
@@ -53,7 +61,8 @@ namespace GennadichGame.Sockets.UDP
 
         public void StopListen()
         {
-            _mainLoop.Abort();
+            _udpServer.Close();
+            _mainLoop.Interrupt();
         }
     }
 }

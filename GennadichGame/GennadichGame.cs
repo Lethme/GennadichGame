@@ -169,7 +169,6 @@ namespace GennadichGame
             {
                 BackgroundManager.ActiveBackground = BackgroundImage.Clouds;
                 CursorManager.ActiveCursor = Cursor.Dart;
-                ((GDarts) s).StartGame();
             };
 
             SceneManager[GameState.GameFindLobby].OnActivate += (s) =>

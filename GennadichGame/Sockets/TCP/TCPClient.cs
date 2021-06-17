@@ -14,7 +14,7 @@ namespace GennadichGame.Sockets.TCP
 
         private string LobbyName { get; set; } = null;
 
-        private ConnectedObject Client { get; set; }
+        public ConnectedObject Client { get; set; }
 
         public GameData ReceiverGameData { get; set; }
         
@@ -22,6 +22,9 @@ namespace GennadichGame.Sockets.TCP
         public delegate void ViewGameData(GameData gameData);
         public event PlayerConnect handleConnection;
         public event ViewGameData handleViewData;
+        
+        public delegate void JoinGame();
+        public event JoinGame handleGame;
 
         public TcpAsyncClient(ConnectionManager connection)
         {
@@ -65,6 +68,10 @@ namespace GennadichGame.Sockets.TCP
                 Client.Close();
                 return false;
             }
+            catch (ObjectDisposedException)
+            {
+                // ignored
+            }
             catch (Exception)
             {
                 return false;
@@ -90,11 +97,11 @@ namespace GennadichGame.Sockets.TCP
                 Client.Close();
                 return false;
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
             {
                 return false;
             }
-            
+
             if (bytesRead == 0) return true;
             var receiverData = DataReceiver.Create(Client.Buffer,bytesRead);
             switch (receiverData.DataType)
@@ -130,6 +137,8 @@ namespace GennadichGame.Sockets.TCP
                     {
                         case ReceiverStatus.Ok:
                         {
+                            if (ReceiverGameData.NumStep == 0 && ReceiverGameData.TurnPlayerNumShoot == 0)
+                                handleGame();
                             handleViewData(ReceiverGameData);
                             break;
                         }

@@ -2,6 +2,7 @@
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
@@ -9,7 +10,6 @@ using GennadichGame.Enums;
 using GennadichGame.Input;
 using GennadichGame.Sockets.Data;
 using GennadichGame.Sockets.TCP;
-
 using GennadichGame.Controls;
 
 namespace GennadichGame.Scenes.Darts
@@ -17,7 +17,9 @@ namespace GennadichGame.Scenes.Darts
     public sealed class GDarts : Scene
     {
         #region Data
+
         private List<MultiLabel> PlayerLabels { get; } = new List<MultiLabel>();
+
         #endregion
 
         #region Properties
@@ -58,6 +60,16 @@ namespace GennadichGame.Scenes.Darts
         {
             if (GMouse.IsButtonPressed(MouseButton.Left))
             {
+                if (Client.ReceiverGameData.WinPlayer != null)
+                {
+                    Thread.Sleep(400);
+                    TcpAsyncServer.SafeCloseAllSockets();
+                    Game.SceneManager.ActiveState = GameState.MainMenu;
+                    foreach (var label in PlayerLabels)
+                    {
+                        label.Clear();       
+                    }
+                }
                 SendShootData();
             }
 
@@ -68,19 +80,17 @@ namespace GennadichGame.Scenes.Darts
         {
             Game.SpriteBatch.Begin();
 
-            Game.SpriteBatch.Draw(Darts.Texture, new Rectangle(Darts.Position.ToPoint(), Darts.Size.ToPoint()), Color.White);
-
-            //var mousePosition = Darts.GetMousePositionParams();
-            //Game.SpriteBatch.DrawString(Game.FontManager[Fonts.RegularConsolas16],
-            //    $"Distance: {(mousePosition.Distance > 1 ? 1 : mousePosition.Distance)}", new Vector2(50, 50),
-            //    Color.Black);
-            //Game.SpriteBatch.DrawString(Game.FontManager[Fonts.RegularConsolas16],
-            //    $"Angle: {GDartsSegment.NormalizeAngle(mousePosition.Angle)}",
-            //    new Vector2(50, 50 + Game.FontManager[Fonts.RegularConsolas16].MeasureString("TEST").Y), Color.Black);
-            Game.SpriteBatch.DrawString(Game.FontManager[Fonts.RegularConsolas16],
-                $"Intersected segment: {Darts.IntersectedSegment}",
-                new Vector2(50, 50 + Game.FontManager[Fonts.RegularConsolas16].MeasureString("TEST").Y * 2),
-                Color.Black);
+            Game.SpriteBatch.Draw(Darts.Texture, new Rectangle(Darts.Position.ToPoint(), Darts.Size.ToPoint()),
+                Color.White);
+            if (Client.ReceiverGameData != null)
+            {
+                var message = Client.ReceiverGameData.WinPlayer != null
+                    ? $"{Client.ReceiverGameData.WinPlayer} win!"
+                    : $"{Client.ReceiverGameData.TurnPlayerName} turn";
+                Game.SpriteBatch.DrawString(Game.FontManager[Fonts.RegularConsolas16],
+                    message, new Vector2(450, 20),
+                    Color.Black);
+            }
 
             if (Client.ReceiverGameData != null)
             {
@@ -89,7 +99,9 @@ namespace GennadichGame.Scenes.Darts
                     var tex = Game.TextureManager[Textures.Dart];
                     var texWidth = tex.Width * .05;
                     var texHeight = tex.Height * .05;
-                    Game.SpriteBatch.Draw(tex, new Rectangle((int)(point.X - texWidth / 2), (int)(point.Y - texHeight / 2), (int)texWidth, (int)texHeight), Color.White);
+                    Game.SpriteBatch.Draw(tex,
+                        new Rectangle((int) (point.X - texWidth / 2), (int) (point.Y - texHeight / 2), (int) texWidth,
+                            (int) texHeight), Color.White);
                 }
             }
 
@@ -106,51 +118,29 @@ namespace GennadichGame.Scenes.Darts
 
         #region PublicMethods
 
-        public void StartGame()
+        public void StartGame(bool isHosted)
         {
             Client.handleViewData += ViewGameInformation;
-            TcpAsyncServer.SendStartGameDataMessage();
+            if (isHosted) TcpAsyncServer.SendStartGameDataMessage();
         }
 
         public void ViewGameInformation(GameData gameData)
         {
-            //if (gameData.WinPlayer == null)
-            //{
-            //    Console.Clear();
-            //    Console.WriteLine("Players:");
-            //    foreach (var playerName in gameData.CurrentPlayers)
-            //    {
-            //        var listScore = gameData.TableScore.GetPlayerScore(playerName).ToList();
-            //        Console.WriteLine(
-            //            $"{gameData.CurrentPlayers.IndexOf(playerName) + 1}. {string.Join(" ", listScore)}");
-            //    }
-
-            //    Console.WriteLine(gameData.TurnPlayerName == ClientName
-            //        ? "Your turn:"
-            //        : $"{gameData.TurnPlayerName} turn:");
-            //    foreach (var shoot in gameData.Shoots)
-            //    {
-            //        Console.WriteLine(
-            //            $"{gameData.Shoots.IndexOf(shoot) + 1}. {shoot.MousePoint} : {shoot.ShootScore}");
-            //    }
-            //}
-            //else
-            //{
-            //    Console.Clear();
-            //    Console.WriteLine($"{gameData.WinPlayer} win!");
-            //}
-            for (var i = 0; i < PlayerLabels.Count; i++)
+            for (var i = 0; i < gameData.CurrentPlayers.Count; i++)
             {
                 if (PlayerLabels[i].Count == 0)
                 {
                     PlayerLabels[i].AddLabel(gameData.CurrentPlayers[i]);
-                    PlayerLabels[i].AddLabel(gameData.TableScore.GetPlayerScore(gameData.CurrentPlayers[i]).Last().ToString());
+                    PlayerLabels[i].AddLabel(gameData.TableScore.GetPlayerScore(gameData.CurrentPlayers[i]).Last()
+                        .ToString());
                 }
                 else
                 {
-                    if (PlayerLabels[i].Count - 1 != gameData.TableScore.GetPlayerScore(gameData.CurrentPlayers[i]).Count)
+                    if (PlayerLabels[i].Count - 1 !=
+                        gameData.TableScore.GetPlayerScore(gameData.CurrentPlayers[i]).Count)
                     {
-                        PlayerLabels[i].AddLabel(gameData.TableScore.GetPlayerScore(gameData.CurrentPlayers[i]).Last().ToString());
+                        PlayerLabels[i].AddLabel(gameData.TableScore.GetPlayerScore(gameData.CurrentPlayers[i]).Last()
+                            .ToString());
                     }
                 }
             }
@@ -158,16 +148,15 @@ namespace GennadichGame.Scenes.Darts
 
         public void SendShootData()
         {
-            if (ClientName == Client.ReceiverGameData.TurnPlayerName)
+            if (ClientName != Client.ReceiverGameData.TurnPlayerName || Client.ReceiverGameData.Shoots.Count == 3)
+                return;
+            var shootInfo = new ShootInfo
             {
-                var shootInfo = new ShootInfo();
-                shootInfo.MousePoint.X = GMouse.Position.X;
-                shootInfo.MousePoint.Y = GMouse.Position.Y;
-                // there calculate score TODO YURA
-                shootInfo.ShootScore = 1;
-                Client.ReceiverGameData.Shoots.Add(shootInfo);
-                Client.SendGameMessage();
-            }
+                MousePoint = {X = GMouse.Position.X, Y = GMouse.Position.Y},
+                ShootScore = Darts.GetIntersectedSegmentScore()
+            };
+            Client.ReceiverGameData.Shoots.Add(shootInfo);
+            Client.SendGameMessage();
         }
 
         #endregion

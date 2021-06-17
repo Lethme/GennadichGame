@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,8 +15,8 @@ namespace GennadichGame.Sockets.TCP
     public static class TcpAsyncServer
     {
         private static readonly List<ConnectedObject> _clients = new List<ConnectedObject>();
-        private static readonly List<Task> ClientsThreads = new List<Task>();
-        private static readonly List<Thread> NetInterfacesThreads = new List<Thread>();
+        private static readonly List<Thread> ClientsThreads = new List<Thread>();
+        private static Thread NetInterfaceThread;
         private static readonly ManualResetEvent _connected = new ManualResetEvent(false);
         public static bool IsGameStart { get; set; } = false;
         private static string _lobbyName = Dns.GetHostName();
@@ -26,43 +27,41 @@ namespace GennadichGame.Sockets.TCP
         private static int NumGamePlayers;
         private static Socket _server;
 
-        public static void StartTcpServer(string lobbyName = null,string serverName = null )
+        public static void StartTcpServer(string lobbyName = null, string serverName = null)
         {
             if (lobbyName != null)
             {
                 _lobbyName = lobbyName;
             }
+
             if (serverName != null)
             {
                 _serverName = serverName;
             }
-            var listInterfaces = NetAdapter.GetAllAddressesInNetwork();
-            foreach (var netInterface in listInterfaces)
+
+            var connection = new ConnectionManager(IPAddress.Any, 12345);
+            NetInterfaceThread = new Thread(() =>
             {
-                var connection = new ConnectionManager(netInterface.IpAddress, 12345);
-                NetInterfacesThreads.Add(new Thread(() =>
+                try
                 {
-                    try {
-                        StartListening(connection);
-                    }
-                    catch (ThreadAbortException) {
-                        Thread.ResetAbort();
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
-                }));
-                NetInterfacesThreads.Last().Start();
-            }
+                    StartListening(connection);
+                }
+                catch (ThreadInterruptedException)
+                {
+                    // ignored
+                }
+                catch
+                {
+                    // ignored
+                }
+            });
+            NetInterfaceThread.Start();
+            
         }
-        
-        public static void StopInterfacesListening()
+
+        public static void StopInterfaceListening()
         {
-            foreach (var thread in NetInterfacesThreads)
-            {
-                thread.Abort();
-            }
+            NetInterfaceThread.Interrupt();
         }
 
         private static void StartListening(ConnectionManager connection)
@@ -70,7 +69,7 @@ namespace GennadichGame.Sockets.TCP
             try
             {
                 _server = connection.CreateListener();
-
+                
                 while (true)
                 {
                     _connected.Reset();
@@ -78,7 +77,11 @@ namespace GennadichGame.Sockets.TCP
                     _connected.WaitOne();
                 }
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
+            {
+                // ignored
+            }
+            catch (SocketException)
             {
                 // ignored
             }
@@ -87,7 +90,7 @@ namespace GennadichGame.Sockets.TCP
 
         private static List<string> GetPlayersNamesList()
         {
-            var players = new List<string> ();
+            var players = new List<string>();
             foreach (var client in _clients)
             {
                 players.Add(client.Name);
@@ -108,7 +111,7 @@ namespace GennadichGame.Sockets.TCP
         {
             IsGameStart = true;
             var players = GetPlayersNamesList();
-            _gameData = new GameData(DateTime.Now, TableScore.Create(players,StartScore),  players[0])
+            _gameData = new GameData(DateTime.Now, TableScore.Create(players, StartScore), players[0])
             {
                 ClientName = _serverName,
                 CurrentNumPlayers = _clients.Count,
@@ -135,10 +138,15 @@ namespace GennadichGame.Sockets.TCP
             }
             catch (SocketException)
             {
+                SendLobbyWaitMessage();
             }
-            catch (Exception ex)
+            catch (ObjectDisposedException)
             {
-                Console.WriteLine(ex.Message);
+                // ignored
+            }
+            catch (Exception)
+            {
+                SendLobbyWaitMessage();
             }
         }
 
@@ -157,10 +165,11 @@ namespace GennadichGame.Sockets.TCP
                         }
                         catch (SocketException)
                         {
+                            SendLobbyWaitMessage();
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine(ex.Message);
+                            SendLobbyWaitMessage();
                         }
                     }
                 }
@@ -179,10 +188,11 @@ namespace GennadichGame.Sockets.TCP
                     }
                     catch (SocketException)
                     {
+                        SendLobbyWaitMessage();
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        SendLobbyWaitMessage();
                     }
                 }
             }
@@ -190,15 +200,31 @@ namespace GennadichGame.Sockets.TCP
 
         private static void AcceptCallback(IAsyncResult ar)
         {
-            _connected.Set();
-            var socket = _server.EndAccept(ar);
+            Socket socket;
+            try
+            {
+                _connected.Set();
+                socket = _server.EndAccept(ar);
+            }
+            catch (ObjectDisposedException)
+            {
+                return;
+            }
+
             var client = new ConnectedObject
             {
                 Socket = socket
             };
-            var clientThread = new Task(() =>
+            var clientThread = new Thread(() =>
             {
-                Receive(client);
+                try
+                {
+                    Receive(client);
+                }
+                catch (ThreadInterruptedException)
+                {
+                    // ignored
+                }
             });
             clientThread.Start();
             ClientsThreads.Add(clientThread);
@@ -214,12 +240,14 @@ namespace GennadichGame.Sockets.TCP
             catch (SocketException)
             {
                 CloseClient(client);
+                SendLobbyWaitMessage();
                 return false;
             }
-            catch (Exception)
+            catch (ObjectDisposedException)
             {
-                return false;
+                // ignored
             }
+
             return true;
         }
 
@@ -239,6 +267,7 @@ namespace GennadichGame.Sockets.TCP
             catch (SocketException)
             {
                 CloseClient(client);
+                SendLobbyWaitMessage();
                 return;
             }
             catch (ObjectDisposedException)
@@ -248,7 +277,7 @@ namespace GennadichGame.Sockets.TCP
 
             if (bytesRead > 0)
             {
-                var receiverData = DataReceiver.Create(client.Buffer,bytesRead);
+                var receiverData = DataReceiver.Create(client.Buffer, bytesRead);
                 switch (receiverData.DataType)
                 {
                     case DataType.LobbyWait:
@@ -278,7 +307,25 @@ namespace GennadichGame.Sockets.TCP
                         {
                             SendGameDataMessage();
                             Thread.Sleep(2000);
-                            
+                            _gameData.TurnPlayerNumShoot = 0;
+                            var playerScore = 0;
+                            foreach (var shoot in _gameData.Shoots)
+                            {
+                                playerScore += shoot.ShootScore;
+                            }
+
+                            if (_gameData.TableScore.CheckOverGoal(_gameData.TurnPlayerName, playerScore))
+                            {
+                                _gameData.TableScore.SetPlayerScoreInStep(_gameData.TurnPlayerName, playerScore);
+                            }
+
+                            _gameData.Shoots.Clear();
+
+                            if (_gameData.TableScore.WinScoreCheck(_gameData.TurnPlayerName))
+                            {
+                                _gameData.WinPlayer = _gameData.TurnPlayerName;
+                            }
+
                             var players = GetPlayersNamesList();
                             if (_gameData.TurnPlayerName == players.Last())
                             {
@@ -289,29 +336,12 @@ namespace GennadichGame.Sockets.TCP
                             {
                                 _gameData.TurnPlayerName = players[players.IndexOf(_gameData.TurnPlayerName) + 1];
                             }
-
-                            _gameData.TurnPlayerNumShoot = 0;
-                            var playerScore = 0;
-                            foreach (var shoot in _gameData.Shoots)
-                            {
-                                playerScore += shoot.ShootScore;
-                            }
-
-                            if (_gameData.TableScore.CheckOverGoal(_gameData.TurnPlayerName,playerScore))
-                            {
-                                _gameData.TableScore.SetPlayerScoreInStep(_gameData.TurnPlayerName,playerScore);
-                            }
-                            _gameData.Shoots.RemoveRange(0,_gameData.Shoots.Count);
-                        
-                            if (_gameData.TableScore.WinScoreCheck(_gameData.TurnPlayerName))
-                            {
-                                _gameData.WinPlayer = _gameData.TurnPlayerName;
-                            }
                         }
                         else
                         {
                             _gameData.TurnPlayerNumShoot++;
                         }
+
                         SendGameDataMessage();
                         break;
                     }
@@ -357,16 +387,19 @@ namespace GennadichGame.Sockets.TCP
             }
         }
 
-        public static void CloseAllSockets()
+        public static void SafeCloseAllSockets()
         {
-            // Close all clients
             foreach (var connection in _clients)
             {
                 connection.Close();
             }
-
-            // Close server
-            _server.Close();
+            _clients.Clear();
+            foreach (var clientThread in ClientsThreads)
+            {
+                clientThread.Interrupt();
+            }
+            ClientsThreads.Clear();
+            _server?.Close();
         }
     }
 }
