@@ -14,6 +14,7 @@ using GennadichGame.Manager;
 using GennadichGame.Controls;
 using GennadichGame.Scenes.Darts;
 using GennadichGame.Scenes.Lobby;
+using GennadichGame.Controls.Input;
 using GennadichGame.Scenes.MainMenu;
 using GennadichGame.Scenes.StartScreen;
 using GennadichGame.Sockets.Common;
@@ -36,6 +37,7 @@ namespace GennadichGame
         public FontManager FontManager { get; }
         public BackgroundManager BackgroundManager { get; }
         public CursorManager CursorManager { get; }
+        public ConfigManager ConfigManager { get; }
         public LinkedList<Control> Controls { get; }
         internal SceneManager SceneManager { get; }
         #endregion
@@ -62,6 +64,7 @@ namespace GennadichGame
             TextureManager = new TextureManager();
             CursorManager = new CursorManager();
             SceneManager = new SceneManager();
+            ConfigManager = ConfigManager.GetConfig();
             Controls = new LinkedList<Control>();
         }
 
@@ -77,6 +80,7 @@ namespace GennadichGame
             Window.Title = "GDarts";
 
             GameModule.Initialize(this);
+            InputBox.Initialize();
 
             base.Initialize();
         }
@@ -145,6 +149,24 @@ namespace GennadichGame
                     Fonts.RegularConsolas16,
                     ("Play offline", 0, () => { }),
                     ("Create game", 0, () => { SceneManager.ActiveState = GameState.GameCreateLobby; }),
+                    ("Connect by IP", 0, () => 
+                    { 
+                        Console.Write("Enter IP: ");
+                        IPAddress addr;
+                        if (IPAddress.TryParse(Console.ReadLine(), out addr))
+                        {
+                            SceneManager.GetScene<GameLobby>(GameState.GameFindLobby).IP = addr;
+                        }
+                        Console.Write("Enter Port: ");
+                        var port = 0;
+                        if (Int32.TryParse(Console.ReadLine(), out port))
+                        {
+                            SceneManager.GetScene<GameLobby>(GameState.GameFindLobby).Port = port;
+                        }
+
+                        SceneManager.ActiveState = GameState.GameFindLobby;
+                    }
+                    ),
                     ("Connect to existing game", 0, () => { SceneManager.ActiveState = GameState.GameFindLobby; }),
                     ("Exit", 0, () => Exit())
                 )),
@@ -200,10 +222,6 @@ namespace GennadichGame
                     GKeyboard.IsKeyDown(Keys.Escape))
                     Exit();
 
-                if (GKeyboard.IsKeyPressed(Keys.F1)) SceneManager.ActiveState = GameState.StartScreen;
-                if (GKeyboard.IsKeyPressed(Keys.F2)) SceneManager.ActiveState = GameState.MainMenu;
-                if (GKeyboard.IsKeyPressed(Keys.F3)) SceneManager.ActiveState = GameState.GameFindLobby;
-                if (GKeyboard.IsKeyPressed(Keys.F4)) SceneManager.ActiveState = GameState.Game;
                 if (GKeyboard.IsKeyPressed(Keys.A))
                 {
                     if (GMouse.AlkashCursor) GMouse.AlkashCursor = false;

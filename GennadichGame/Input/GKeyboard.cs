@@ -44,6 +44,18 @@ namespace GennadichGame.Input
             if (OnKeyPressed != null && GetPressedKeys().Count() > 0) OnKeyPressed.Invoke(currentState, GetPressedKeys());
             if (OnKeyReleased != null && GetReleasedKeys().Count() > 0) OnKeyReleased.Invoke(currentState, GetReleasedKeys());
         }
+        public static bool IsAnyKeyDown()
+        {
+            return GetDownKeys().Count() != 0;
+        }
+        public static bool IsAnyKeyPressed()
+        {
+            return GetPressedKeys().Count() != 0;
+        }
+        public static bool IsAnyKeyReleased()
+        {
+            return GetReleasedKeys().Count() != 0;
+        }
         public static bool IsKeyDown(Keys key)
         {
             return currentState.IsKeyDown(key);

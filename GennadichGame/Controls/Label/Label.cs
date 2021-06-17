@@ -18,6 +18,10 @@ namespace GennadichGame.Controls
         public Color FontColor { get; set; } = DefaultFontColor;
         public Position Position { set { SetPosition(value); } }
         public Label() { }
+        public Label(String text = null)
+        {
+            if (text != null) Text = text;
+        }
         public Label(String text = null, Position? position = null, Fonts? font = null, Color? fontColor = null)
         {
             if (text != null) Text = text;

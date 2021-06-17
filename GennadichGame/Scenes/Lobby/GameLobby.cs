@@ -29,7 +29,8 @@ namespace GennadichGame.Scenes.Lobby
         private SpriteFont LobbyNameFont => Game.FontManager[Fonts.RegularConsolas16];
         private SpriteFont PlayersCountFont => Game.FontManager[Fonts.RegularConsolas18];
         private SpriteFont PlayersNamesFont => Game.FontManager[Fonts.RegularConsolas16];
-
+        public IPAddress IP { get; set; } = null;
+        public int? Port { get; set; } = null;
         
         public GameLobby(bool isHosted, string clientName)
         {
@@ -64,6 +65,11 @@ namespace GennadichGame.Scenes.Lobby
                 _udpServer.StopListen();
                 TcpAsyncServer.SafeCloseAllSockets();
             }
+            else
+            {
+                _client.Client.Socket.Close();
+            }
+
             Game.SceneManager.ActiveState = GameState.MainMenu;
         }
 
@@ -75,20 +81,39 @@ namespace GennadichGame.Scenes.Lobby
                 _udpServer.StartListen();
                 TcpAsyncServer.StartTcpServer();
             }
-
-            var udpClient = new UdpClient("GDarts", 11000, 3000);
-            if (udpClient.SendToBroadcast())
+            else
             {
-                var connection = new ConnectionManager(IPAddress.Parse(udpClient.ServerAddress.Address.ToString()),
-                    udpClient.TcpPort);
+                ConnectionManager connection;
+
+                if (IP != null)
+                {
+                    if (Port != null)
+                    {
+                        connection = new ConnectionManager(IP, Port.Value);
+                    }
+                    else
+                    {
+                        connection = new ConnectionManager(IP, Game.ConfigManager.TcpPort);
+                    }
+                }
+                else
+                {
+                    var udpClient = new UdpClient("GDarts", 11000, 3000);
+                    if (udpClient.SendToBroadcast())
+                    {
+                        connection = new ConnectionManager(IPAddress.Parse(udpClient.ServerAddress.Address.ToString()),
+                            udpClient.TcpPort);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
                 _client = new TcpAsyncClient(connection);
                 _client.handleConnection += AddPlayerInLobby;
                 _client.handleGame += JoinGame;
                 _client.SendFindLobbyMessage();
-            }
-            else
-            {
-                return;
             }
 
             base.Initialize();

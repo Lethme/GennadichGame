@@ -8,6 +8,10 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <Version>0.0.2</Version>
+    <Authors>Ashe, SemD, NPC_30</Authors>
+    <Company>No Walls Production</Company>
+    <Description>Some random shit made for Gennadich</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Icon.ico" />
